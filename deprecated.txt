@@ -1,0 +1,73 @@
+#define SINGLE_UNROLL(N) \
+	pixel_data[current_row_offset + current_pixel_offset_##N] = CALCULATE_AVG_B(current_pixel_offset_##N); \
+	pixel_data[current_row_offset + current_pixel_offset_##N + 1] = CALCULATE_AVG_G(current_pixel_offset_##N); \
+	pixel_data[current_row_offset + current_pixel_offset_##N + 2] = CALCULATE_AVG_R(current_pixel_offset_##N) \
+
+
+void BlurImpls::BlurLoopUnroll7(Bitmap& bitmap)
+{
+	constexpr int32_t kWpl = 10;
+
+	int32_t width_px = bitmap.width_px();
+	int32_t height_px = bitmap.height_px();
+	uint32_t bytes_per_px = bitmap.info_header.bits_per_pixel / 8;
+	uint32_t bytes_per_row =
+		((bitmap.info_header.width_px * bitmap.info_header.bits_per_pixel / 8 - 1) / 4 + 1) * 4;
+
+	std::vector<uint8_t> pixel_store_1(bytes_per_px * width_px);
+	// copy first row data (except left-most, right-most pixels and right paddings)
+	std::copy(
+		&bitmap.pixel_data[0],
+		&bitmap.pixel_data[bytes_per_px * width_px],
+		pixel_store_1.begin());
+
+	std::vector<uint8_t> pixel_store_2(bytes_per_px * width_px);
+	// copy second row data (except left-most, right-most pixels and right paddings)
+	std::copy(
+		&bitmap.pixel_data[bytes_per_row],
+		&bitmap.pixel_data[bytes_per_row + bytes_per_px * width_px],
+		pixel_store_2.begin());
+
+	uint8_t* const pixel_data = bitmap.pixel_data.data();
+	uint8_t* upper_row_pixels = pixel_store_1.data();
+	uint8_t* current_row_pixels = pixel_store_2.data();
+
+	for (int32_t i = 1; i < height_px - 1; i++)
+	{
+		int32_t current_row_offset = i * bytes_per_row;
+		int32_t lower_row_offset = current_row_offset + bytes_per_row;
+
+		for (int32_t j = 1; j < width_px - 1; j+=kWpl)
+		{
+			// Beginning index of current pixel data.
+			int32_t current_pixel_offset_1 = j * bytes_per_px;
+			int32_t current_pixel_offset_2 = current_pixel_offset_1 + bytes_per_px;
+			int32_t current_pixel_offset_3 = current_pixel_offset_2 + bytes_per_px;
+			int32_t current_pixel_offset_4 = current_pixel_offset_3 + bytes_per_px;
+			int32_t current_pixel_offset_5 = current_pixel_offset_4 + bytes_per_px;
+			int32_t current_pixel_offset_6 = current_pixel_offset_5 + bytes_per_px;
+			int32_t current_pixel_offset_7 = current_pixel_offset_6 + bytes_per_px;
+			int32_t current_pixel_offset_8 = current_pixel_offset_7 + bytes_per_px;
+			int32_t current_pixel_offset_9 = current_pixel_offset_8 + bytes_per_px;
+			int32_t current_pixel_offset_10 = current_pixel_offset_9 + bytes_per_px;
+
+			SINGLE_UNROLL(1);
+			SINGLE_UNROLL(2);
+			SINGLE_UNROLL(3);
+			SINGLE_UNROLL(4);
+			SINGLE_UNROLL(5);
+			SINGLE_UNROLL(6);
+			SINGLE_UNROLL(7);
+			SINGLE_UNROLL(8);
+			SINGLE_UNROLL(9);
+			SINGLE_UNROLL(10);
+		}
+
+		std::copy(
+			pixel_data + lower_row_offset,
+			pixel_data + lower_row_offset + bytes_per_px * width_px,
+			upper_row_pixels);
+
+		std::swap(upper_row_pixels, current_row_pixels);
+	}
+}
