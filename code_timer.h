@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -19,9 +20,11 @@ public:
 	static void Start();
 	static void Start(const std::string& name);
 	static double EndAndPrint(
-		TimeUnit unit = TimeUnit::MILLISECOND,
-		std::streamsize fixedPrecision = 2);
-	static double End(TimeUnit unit = TimeUnit::MILLISECOND);
+		const double reference = -1.0,
+		const std::string& reference_name = "",
+		const TimeUnit unit = TimeUnit::MILLISECOND,
+		const std::streamsize fixedPrecision = 2);
+	static double End(const TimeUnit unit = TimeUnit::MILLISECOND);
 
 private:
 	static std::string name_;

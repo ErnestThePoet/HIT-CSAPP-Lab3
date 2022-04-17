@@ -12,13 +12,16 @@ constexpr int kTestCount = 1;
 #define TEST_LOOP_UNROLL
 #define TEST_CACHE_OPT
 //#define TEST_AVX
+//#define TEST_OPENMP
 //#define TEST_OPENCL
 
-//#define TEST_OPENMP
+
+//#define SAVE_NAIVE
+//#define SAVE_OPTIMIZATIONS
 
 int main()
 {
-    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/chinamap.bmp");
+    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/lines.bmp");
 
     if (original_bitmap.info_header.bits_per_pixel != 24)
     {
@@ -36,7 +39,7 @@ int main()
         << original_bitmap.height_px()
         << " bitmap "
         << kTestCount
-        << " times per candidate."
+        << " time(s) per candidate."
         << std::endl;
 
     Bitmap bitmap_copy{};
@@ -93,8 +96,11 @@ int main()
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
-    //BmpHelper::Save(bitmap_copy, "./blurred/naive_impl.bmp");
+    double naive_time = CodeTimer::EndAndPrint();
+
+#ifdef PRINT_NAIVE
+    BmpHelper::Save(bitmap_copy, "./blurred/naive_impl.bmp");
+#endif
 #endif
 
 
@@ -105,7 +111,7 @@ int main()
     {
         BlurImpls::BlurLoopUnroll3(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
+    CodeTimer::EndAndPrint(naive_time);
 
     bitmap_copy = original_bitmap;
     CodeTimer::Start("Loop Unroll 5x");
@@ -113,7 +119,7 @@ int main()
     {
         BlurImpls::BlurLoopUnroll5(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
+    CodeTimer::EndAndPrint(naive_time);
 
     bitmap_copy = original_bitmap;
     CodeTimer::Start("Loop Unroll 7x");
@@ -121,7 +127,7 @@ int main()
     {
         BlurImpls::BlurLoopUnroll7(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
+    CodeTimer::EndAndPrint(naive_time);
 
     bitmap_copy = original_bitmap;
     CodeTimer::Start("Loop Unroll 9x");
@@ -129,38 +135,48 @@ int main()
     {
         BlurImpls::BlurLoopUnroll9(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
-    //BmpHelper::Save(bitmap_copy, "./blurred/loop_unroll.bmp");
+    CodeTimer::EndAndPrint(naive_time);
+
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 11x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll11(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint(naive_time);
+
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 13x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll13(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint(naive_time);
+
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 15x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll15(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint(naive_time);
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/loop_unroll.bmp");
+#endif
 #endif
 
 
 #ifdef TEST_CACHE_OPT
     bitmap_copy = original_bitmap;
-    //using std::cout;
-    //using std::endl;
-    //cout << "xs5=[";
-    //for (int j = 2000; j <= 7000; j += 200)
-    //{
-    //    cout << j << ',';
-    //}
-    //cout << "];" << endl<<"ys5=[";
-    //for (int j = 2000; j <= 7000; j += 200)
-    //{
-    //    CodeTimer::Start(std::string("Memory Blocking, B=")+std::to_string(j));
-    //    for (int i = 0; i < kTestCount; i++)
-    //    {
-    //        BlurImpls::BlurMemoryBlocking(bitmap_copy,j);
-    //    }
-    //    cout<<CodeTimer::End()<<",";
-    //}
-    //cout << "];" << endl;
     CodeTimer::Start(std::string("Cache Optimization"));
     for (int i = 0; i < kTestCount; i++)
     {
         BlurImpls::BlurCacheOpt(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
-    //BmpHelper::Save(bitmap_copy, "./blurred/cache_opt.bmp");
+    CodeTimer::EndAndPrint(naive_time);
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/cache_opt.bmp");
+#endif
 #endif
 
 
@@ -172,6 +188,9 @@ int main()
         BlurImpls::BlurAVX(bitmap_copy);
     }
     CodeTimer::EndAndPrint();
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/avx.bmp");
+#endif
 #endif
 
 
@@ -183,6 +202,9 @@ int main()
         BlurOpenCL(bitmap_copy);
     }
     CodeTimer::EndAndPrint();
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/opencl.bmp");
+#endif
 #endif
 
 
@@ -194,6 +216,9 @@ int main()
         BlurImpls::BlurOpenMP(bitmap_copy);
     }
     CodeTimer::EndAndPrint();
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/openmp.bmp");
+#endif
 #endif
 
 

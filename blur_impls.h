@@ -19,20 +19,23 @@ int32_t lower_index_##N = lower_row_offset + current_pixel_offset + kByteOffset#
 
 
 #define SINGLE_UNROLL(N) \
-pixel_data[current_total_offset_##N] = (upper_row_pixels[current_pixel_offset+kByteOffset##N] >> 2)\
-+ (current_row_pixels[l_index_##N] >> 2)\
-+ (pixel_data[r_index_##N] >> 2)\
-+ (pixel_data[lower_index_##N] >> 2);\
+pixel_data[current_total_offset_##N] = \
+((uint32_t)upper_row_pixels[current_pixel_offset+kByteOffset##N])\
++ (current_row_pixels[l_index_##N])\
++ (pixel_data[r_index_##N])\
++ (pixel_data[lower_index_##N]) >> 2;\
 \
-pixel_data[current_total_offset_##N + 1] = (upper_row_pixels[current_pixel_offset+kByteOffset##N + 1] >> 2)\
-+ (current_row_pixels[l_index_##N + 1] >> 2)\
-+ (pixel_data[r_index_##N + 1] >> 2)\
-+ (pixel_data[lower_index_##N + 1] >> 2);\
+pixel_data[current_total_offset_##N + 1] = \
+((uint32_t)upper_row_pixels[current_pixel_offset+kByteOffset##N + 1])\
++ (current_row_pixels[l_index_##N + 1])\
++ (pixel_data[r_index_##N + 1])\
++ (pixel_data[lower_index_##N + 1]) >> 2;\
 \
-pixel_data[current_total_offset_##N + 2] = (upper_row_pixels[current_pixel_offset+kByteOffset##N + 2] >> 2)\
-+ (current_row_pixels[l_index_##N + 2] >> 2)\
-+ (pixel_data[r_index_##N + 2] >> 2)\
-+ (pixel_data[lower_index_##N + 2] >> 2)
+pixel_data[current_total_offset_##N + 2] = \
+((uint32_t)upper_row_pixels[current_pixel_offset+kByteOffset##N + 2])\
++ (current_row_pixels[l_index_##N + 2])\
++ (pixel_data[r_index_##N + 2])\
++ (pixel_data[lower_index_##N + 2]) >> 2
 
 
 class BlurImpls
@@ -44,6 +47,9 @@ public:
 	static void BlurLoopUnroll5(Bitmap& bitmap);
 	static void BlurLoopUnroll7(Bitmap& bitmap);
 	static void BlurLoopUnroll9(Bitmap& bitmap);
+	static void BlurLoopUnroll11(Bitmap& bitmap);
+	static void BlurLoopUnroll13(Bitmap& bitmap);
+	static void BlurLoopUnroll15(Bitmap& bitmap);
 
 	static void BlurCacheOpt(Bitmap& bitmap);
 

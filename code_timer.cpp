@@ -23,7 +23,11 @@ void CodeTimer::Start(const std::string& name)
 	is_started_ = true;
 }
 
-double CodeTimer::EndAndPrint(TimeUnit unit, std::streamsize fixedPrecision)
+double CodeTimer::EndAndPrint(
+	const double reference,
+	const std::string& reference_name,
+	const TimeUnit unit, 
+	const std::streamsize fixedPrecision)
 {
 	if (!is_started_)
 	{
@@ -55,6 +59,29 @@ double CodeTimer::EndAndPrint(TimeUnit unit, std::streamsize fixedPrecision)
 			break;
 	}
 
+	if (reference>=0)
+	{
+		double diff = reference - elapse;
+
+		std::cout << " (";
+
+		if (reference > 0)
+		{
+			double diff_percent = (diff / reference) * 100.0;
+			std::cout
+				// fixed is already set
+				<< std::setprecision(2)
+				<< abs(diff_percent)
+				<< "% ";
+		}
+		
+		std::cout
+			<< ((diff >= 0) ? "faster" : "slower")
+			<< ((reference_name.length() > 0) ? " than " : "")
+			<< reference_name
+			<< ')';
+	}
+
 	std::cout << std::endl;
 	std::cout.unsetf(std::ios_base::fixed);
 	std::cout.precision(6);
@@ -62,7 +89,7 @@ double CodeTimer::EndAndPrint(TimeUnit unit, std::streamsize fixedPrecision)
 	return elapse;
 }
 
-double CodeTimer::End(TimeUnit unit)
+double CodeTimer::End(const TimeUnit unit)
 {
 	if (!is_started_)
 	{
