@@ -58,5 +58,11 @@
     <None Include="deprecated.txt">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="loop_unroll_begin.inc">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="loop_unroll_end.inc">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

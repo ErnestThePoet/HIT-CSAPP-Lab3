@@ -9,7 +9,8 @@ constexpr int kTestCount = 1;
 
 #define USE_WARMUP
 #define TEST_NAIVE
-#define TEST_MEMORY_BLOCKING
+#define TEST_LOOP_UNROLL
+#define TEST_CACHE_OPT
 //#define TEST_AVX
 //#define TEST_OPENCL
 
@@ -97,7 +98,43 @@ int main()
 #endif
 
 
-#ifdef TEST_MEMORY_BLOCKING
+#ifdef TEST_LOOP_UNROLL
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 3x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll3(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint();
+
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 5x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll5(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint();
+
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 7x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll7(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint();
+
+    bitmap_copy = original_bitmap;
+    CodeTimer::Start("Loop Unroll 9x");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurLoopUnroll9(bitmap_copy);
+    }
+    CodeTimer::EndAndPrint();
+    //BmpHelper::Save(bitmap_copy, "./blurred/loop_unroll.bmp");
+#endif
+
+
+#ifdef TEST_CACHE_OPT
     bitmap_copy = original_bitmap;
     //using std::cout;
     //using std::endl;
@@ -117,13 +154,13 @@ int main()
     //    cout<<CodeTimer::End()<<",";
     //}
     //cout << "];" << endl;
-    CodeTimer::Start(std::string("Memory Blocking, B=500"));
+    CodeTimer::Start(std::string("Cache Optimization"));
     for (int i = 0; i < kTestCount; i++)
     {
-        BlurImpls::BlurMemoryBlocking(bitmap_copy, 500);
+        BlurImpls::BlurCacheOpt(bitmap_copy);
     }
     CodeTimer::EndAndPrint();
-    BmpHelper::Save(bitmap_copy, "./blurred/mem_blocking.bmp");
+    //BmpHelper::Save(bitmap_copy, "./blurred/cache_opt.bmp");
 #endif
 
 
