@@ -11,7 +11,7 @@ constexpr int kTestCount = 1;
 #define TEST_NAIVE
 #define TEST_LOOP_UNROLL
 #define TEST_CACHE_OPT
-//#define TEST_AVX
+#define TEST_AVX
 //#define TEST_OPENMP
 //#define TEST_OPENCL
 
@@ -21,7 +21,7 @@ constexpr int kTestCount = 1;
 
 int main()
 {
-    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/lines.bmp");
+    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/chinamap.bmp");
 
     if (original_bitmap.info_header.bits_per_pixel != 24)
     {
@@ -187,7 +187,7 @@ int main()
     {
         BlurImpls::BlurAVX(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
+    CodeTimer::EndAndPrint(naive_time);
 #ifdef SAVE_OPTIMIZATIONS
     BmpHelper::Save(bitmap_copy, "./blurred/avx.bmp");
 #endif
@@ -201,7 +201,7 @@ int main()
     {
         BlurOpenCL(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
+    CodeTimer::EndAndPrint(naive_time);
 #ifdef SAVE_OPTIMIZATIONS
     BmpHelper::Save(bitmap_copy, "./blurred/opencl.bmp");
 #endif
@@ -215,7 +215,7 @@ int main()
     {
         BlurImpls::BlurOpenMP(bitmap_copy);
     }
-    CodeTimer::EndAndPrint();
+    CodeTimer::EndAndPrint(naive_time);
 #ifdef SAVE_OPTIMIZATIONS
     BmpHelper::Save(bitmap_copy, "./blurred/openmp.bmp");
 #endif
