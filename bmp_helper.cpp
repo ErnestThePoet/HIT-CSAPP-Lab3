@@ -27,9 +27,16 @@ Bitmap BmpHelper::Load(const std::string& file_name)
 		// row count
 		* abs(bitmap.info_header.height_px);
 
-	bitmap.pixel_data.resize(bmp_data_size);
+	bitmap.alloc_4096_aligned_pixel_data(bmp_data_size);
 
-	ifs.read(reinterpret_cast<char*>(bitmap.pixel_data.data()), bmp_data_size);
+	if (bitmap.pixel_data() == NULL)
+	{
+		std::cerr << BRACKETED_LINE(
+			"Cannot load bitmap: Failed to allocate 4096-byte aligned pixel data buffer.");
+		return Bitmap();
+	}
+
+	ifs.read(reinterpret_cast<char*>(bitmap.pixel_data()), bmp_data_size);
 
 	ifs.close();
 
@@ -66,7 +73,7 @@ void BmpHelper::PrintBitmapInfo(const Bitmap& bitmap)
 
 	uint32_t bytes_per_px = bitmap.info_header.bits_per_pixel / 8;
 
-	if (bitmap.pixel_data.size() < kPixelsToPrint * bytes_per_px)
+	if (bitmap.pixel_data_size() < kPixelsToPrint * bytes_per_px)
 	{
 		return;
 	}
@@ -77,7 +84,7 @@ void BmpHelper::PrintBitmapInfo(const Bitmap& bitmap)
 	{
 		for (size_t j = 0; j < bytes_per_px; j++)
 		{
-			cout << (int)bitmap.pixel_data[i * bytes_per_px + j];
+			cout << (int)bitmap.pixel_data()[i * bytes_per_px + j];
 			if (j != bytes_per_px - 1)
 			{
 				cout << ',';
@@ -105,7 +112,7 @@ void BmpHelper::Save(const Bitmap& bitmap, const std::string& file_name)
 	ofs.write(reinterpret_cast<const char*>(
 		bitmap.palettes.data()),
 		sizeof(Bitmap::BmpPalette) * bitmap.palettes.size());
-	ofs.write(reinterpret_cast<const char*>(bitmap.pixel_data.data()), bitmap.pixel_data.size());
+	ofs.write(reinterpret_cast<const char*>(bitmap.pixel_data()), bitmap.pixel_data_size());
 
 	ofs.close();
 }

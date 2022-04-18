@@ -118,10 +118,13 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\AMD APP SDK\3.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\AMD APP SDK\3.0\lib\x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -132,12 +135,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\AMD APP SDK\3.0\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\AMD APP SDK\3.0\lib\x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>opencl.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -145,6 +151,7 @@
     <ClCompile Include="blur_impls.cpp" />
     <ClCompile Include="blur_opencl.cpp" />
     <ClCompile Include="bmp_helper.cpp" />
+    <ClCompile Include="cl_device_helper.cpp" />
     <ClCompile Include="code_timer.cpp" />
     <ClCompile Include="ImageBlur.cpp" />
   </ItemGroup>
@@ -153,6 +160,7 @@
     <ClInclude Include="blur_impls.h" />
     <ClInclude Include="blur_opencl.h" />
     <ClInclude Include="bmp_helper.h" />
+    <ClInclude Include="cl_device_helper.h" />
     <ClInclude Include="code_timer.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>

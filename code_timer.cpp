@@ -59,24 +59,27 @@ double CodeTimer::EndAndPrint(
 			break;
 	}
 
-	if (reference>=0)
+	
+	if (reference >= 0)
 	{
-		double diff = reference - elapse;
-
 		std::cout << " (";
 
-		if (reference > 0)
+		if (elapse > 0)
 		{
-			double diff_percent = (diff / reference) * 100.0;
+			double diff_percent = (reference / elapse - 1.0) * 100.0;
 			std::cout
 				// fixed is already set
 				<< std::setprecision(2)
 				<< abs(diff_percent)
 				<< "% ";
 		}
-		
+		else
+		{
+			std::cout << "¡Þ ";
+		}
+
 		std::cout
-			<< ((diff >= 0) ? "faster" : "slower")
+			<< ((elapse <= reference) ? "faster" : "slower")
 			<< ((reference_name.length() > 0) ? " than " : "")
 			<< reference_name
 			<< ')';

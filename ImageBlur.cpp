@@ -5,7 +5,7 @@
 #include "blur_opencl.h"
 
 
-constexpr int kTestCount = 1;
+constexpr int kTestCount = 10;
 
 #define USE_WARMUP
 #define TEST_NAIVE
@@ -21,7 +21,7 @@ constexpr int kTestCount = 1;
 
 int main()
 {
-    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/chinamap.bmp");
+    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/scenery.bmp");
 
     if (original_bitmap.info_header.bits_per_pixel != 24)
     {
@@ -98,7 +98,7 @@ int main()
     }
     double naive_time = CodeTimer::EndAndPrint();
 
-#ifdef PRINT_NAIVE
+#ifdef SAVE_NAIVE
     BmpHelper::Save(bitmap_copy, "./blurred/naive_impl.bmp");
 #endif
 #endif

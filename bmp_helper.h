@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include <malloc.h>
+
 #include "bitmap.h"
 #include "utilities.h"
 

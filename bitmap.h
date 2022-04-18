@@ -1,7 +1,13 @@
 #pragma once
 #include <cstdint>
 #include <cstdlib>
+#include <iostream>
 #include <vector>
+#include <utility>
+
+#include <malloc.h>
+
+#include "utilities.h"
 
 struct Bitmap
 {
@@ -40,15 +46,63 @@ public:
 		uint8_t reserved;
 	};
 
+	Bitmap() :pixel_data_(NULL), pixel_data_size_(0), alloc_size_(0) {}
+	~Bitmap()
+	{
+		if (this->pixel_data_)
+		{
+			_aligned_free(this->pixel_data_);
+		}
+	}
+
+	Bitmap(const Bitmap& bitmap)
+	{
+		CopyFromBitmap(bitmap);
+	}
+
+	Bitmap& operator = (const Bitmap& bitmap)
+	{
+		CopyFromBitmap(bitmap);
+		return *this;
+	}
+
 	uint8_t file_type[2]{};
 	BmpHeader header{};
 	BmpInfoHeader info_header{};
 	std::vector<BmpPalette> palettes;
-	// Experiments show that vector.data() has equal performance to naive heap array.
-	// And in Release mode (/O2), vector[] has equal performance to vector.data()
-	std::vector<uint8_t> pixel_data;
+
+	// be sure to check pixel_data() to confirm whether successfully allocated
+	// just provide bmp padded pixel data size. auto align memory that is a multiple of 64-byte
+	void alloc_4096_aligned_pixel_data(size_t pixel_data_size);
+	uint8_t* pixel_data() const;
+	size_t pixel_data_size() const;
 
 	int32_t width_px() const;
 	int32_t height_px() const;
+
+private:
+	// 4096 byte aligned
+	uint8_t* pixel_data_ = NULL;
+	// actual padded size of bmp data, used to read/write bmp
+	size_t pixel_data_size_ = 0;
+	// allocated size that is a multiple of 64-byte
+	size_t alloc_size_ = 0;
+
+	void CopyFromBitmap(const Bitmap& bitmap)
+	{
+		this->file_type[0] = bitmap.file_type[0];
+		this->file_type[1] = bitmap.file_type[1];
+
+		this->header = bitmap.header;
+		this->info_header = bitmap.info_header;
+		this->palettes = bitmap.palettes;
+
+		this->alloc_4096_aligned_pixel_data(bitmap.alloc_size_);
+
+		if (this->pixel_data_ != NULL)
+		{
+			std::copy(bitmap.pixel_data_, bitmap.pixel_data_ + bitmap.alloc_size_, this->pixel_data_);
+		}
+	}
 };
 

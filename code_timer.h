@@ -19,6 +19,7 @@ public:
 
 	static void Start();
 	static void Start(const std::string& name);
+	// pass a negative reference to disable reference
 	static double EndAndPrint(
 		const double reference = -1.0,
 		const std::string& reference_name = "",

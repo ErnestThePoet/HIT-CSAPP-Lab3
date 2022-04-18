@@ -11,18 +11,18 @@ void BlurImpls::BlurNaive(Bitmap& bitmap)
 	std::vector<uint8_t> pixel_store_1(bytes_per_px * width_px);
 	// copy first row data (except right paddings)
 	std::copy(
-		&bitmap.pixel_data[0],
-		&bitmap.pixel_data[bytes_per_px * width_px],
+		bitmap.pixel_data(),
+		bitmap.pixel_data()+ bytes_per_px * width_px,
 		pixel_store_1.begin());
 
 	std::vector<uint8_t> pixel_store_2(bytes_per_px * width_px);
 	// copy second row data (except right paddings)
 	std::copy(
-		&bitmap.pixel_data[bytes_per_row],
-		&bitmap.pixel_data[bytes_per_row + bytes_per_px * width_px],
+		bitmap.pixel_data()+bytes_per_row,
+		bitmap.pixel_data()+bytes_per_row + bytes_per_px * width_px,
 		pixel_store_2.begin());
 
-	uint8_t* const pixel_data = bitmap.pixel_data.data();
+	uint8_t* const pixel_data = bitmap.pixel_data();
 	uint8_t* upper_row_pixels = pixel_store_1.data();
 	uint8_t* current_row_pixels = pixel_store_2.data();
 
@@ -283,18 +283,18 @@ void BlurImpls::BlurCacheOpt(Bitmap& bitmap)
 	std::vector<uint8_t> pixel_store_1(bytes_per_px * width_px);
 	// copy first row data (except right paddings)
 	std::copy(
-		&bitmap.pixel_data[0],
-		&bitmap.pixel_data[bytes_per_px * width_px],
+		bitmap.pixel_data(),
+		bitmap.pixel_data()+bytes_per_px * width_px,
 		pixel_store_1.begin());
 
 	std::vector<uint8_t> pixel_store_2(bytes_per_px * width_px);
 	// copy second row data (except right paddings)
 	std::copy(
-		&bitmap.pixel_data[bytes_per_row],
-		&bitmap.pixel_data[bytes_per_row + bytes_per_px * width_px],
+		bitmap.pixel_data()+bytes_per_row,
+		bitmap.pixel_data()+bytes_per_row + bytes_per_px * width_px,
 		pixel_store_2.begin());
 
-	uint8_t* const pixel_data = bitmap.pixel_data.data();
+	uint8_t* const pixel_data = bitmap.pixel_data();
 	uint8_t* upper_row_pixels = pixel_store_1.data();
 	uint8_t* current_row_pixels = pixel_store_2.data();
 
@@ -365,6 +365,7 @@ void BlurImpls::BlurCacheOpt(Bitmap& bitmap)
 	}
 }
 
+// requires AVX, AVX2
 void BlurImpls::BlurAVX(Bitmap& bitmap)
 {
 	// pixels per inner loop
@@ -377,18 +378,18 @@ void BlurImpls::BlurAVX(Bitmap& bitmap)
 	std::vector<uint8_t> pixel_store_1(bytes_per_px * width_px);
 	// copy first row data (except right paddings)
 	std::copy(
-		&bitmap.pixel_data[0],
-		&bitmap.pixel_data[bytes_per_px * width_px],
+		bitmap.pixel_data(),
+		bitmap.pixel_data()+bytes_per_px * width_px,
 		pixel_store_1.begin());
 
 	std::vector<uint8_t> pixel_store_2(bytes_per_px * width_px);
 	// copy second row data (except right paddings)
 	std::copy(
-		&bitmap.pixel_data[bytes_per_row],
-		&bitmap.pixel_data[bytes_per_row + bytes_per_px * width_px],
+		bitmap.pixel_data()+bytes_per_row,
+		bitmap.pixel_data()+bytes_per_row + bytes_per_px * width_px,
 		pixel_store_2.begin());
 
-	uint8_t* const pixel_data = bitmap.pixel_data.data();
+	uint8_t* const pixel_data = bitmap.pixel_data();
 	uint8_t* upper_row_pixels = pixel_store_1.data();
 	uint8_t* current_row_pixels = pixel_store_2.data();
 
