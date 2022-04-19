@@ -23,7 +23,8 @@ double CodeTimer::StopAndPrint(
 	const double reference,
 	const std::string& reference_name,
 	const TimeUnit unit, 
-	const std::streamsize fixedPrecision)
+	const std::streamsize fixedPrecision,
+	const std::streamsize width)
 {
 	if (!is_started_)
 	{
@@ -38,7 +39,7 @@ double CodeTimer::StopAndPrint(
 
 	if (name_.length() > 0)
 	{
-		std::cout << '[' << name_ << "] ";
+		std::cout << std::left << std::setw(width) << ('[' + name_ + "] ") << std::right;
 	}
 
 	std::cout << "Time Cost: ";

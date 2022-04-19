@@ -1,3 +1,6 @@
+#include <iostream>
+#include <string>
+
 #include "bmp_helper.h"
 #include "code_timer.h"
 
@@ -6,7 +9,7 @@
 #include "cl_device_helper.h"
 
 
-constexpr int kTestCount = 1;
+//#define COMPILE_OPENCL_PROGRAM_ONLY
 
 #define USE_WARMUP
 #define TEST_NAIVE
@@ -16,12 +19,11 @@ constexpr int kTestCount = 1;
 #define TEST_OPENMP
 #define TEST_OPENCL
 
-//#define COMPILE_OPENCL_PROGRAM_ONLY
 #define CL_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
 
 //#define SAVE_NAIVE
 //#define SAVE_OPTIMIZATIONS
-#define SAVE_OPENCL
+//#define SAVE_OPENCL
 
 
 int main()
@@ -36,8 +38,18 @@ int main()
     CompileOpenCLKernelBinary(compile_target_device_id,"-cl-std=CL2.0");
     return 0;
 #endif
+
     CodeTimer timer;
-    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/scenery.bmp");
+
+    std::cout << "Enter a bmp file name to run benchmark on: ";
+    std::string bmp_file_name;
+    std::cin >> bmp_file_name;
+
+    std::cout << "Enter the benchmark iteration count: ";
+    int test_count = 1;
+    std::cin >> test_count;
+
+    Bitmap original_bitmap = BmpHelper::Load(bmp_file_name);
 
     if (original_bitmap.info_header.bits_per_pixel != 24)
     {
@@ -54,7 +66,7 @@ int main()
         << " * "
         << original_bitmap.height_px()
         << " bitmap "
-        << kTestCount
+        << test_count
         << " time(s) per candidate."
         << std::endl;
 
@@ -62,39 +74,43 @@ int main()
 
 
 #ifdef USE_WARMUP
-    std::cout << "-------------------- Turbo Boost Warming Up --------------------" << std::endl;
+    std::cout
+        << std::string(38, '-')
+        << " Turbo Boost Warming Up "
+        << std::string(38, '-')
+        << std::endl;
 
     bitmap_copy = original_bitmap;
-    timer.Start("Naive Implementation ------- WARMUP ONLY");
-    for (int i = 0; i < kTestCount; i++)
+    timer.Start("Naive Implementation WARMUP");
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
     timer.StopAndPrint();
 
-    timer.Start("Naive Implementation ------- WARMUP ONLY");
-    for (int i = 0; i < kTestCount; i++)
+    timer.Start("Naive Implementation WARMUP");
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
     timer.StopAndPrint();
 
-    timer.Start("Naive Implementation ------- WARMUP ONLY");
-    for (int i = 0; i < kTestCount; i++)
+    timer.Start("Naive Implementation WARMUP");
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
     timer.StopAndPrint();
 
-    timer.Start("Naive Implementation ------- WARMUP ONLY");
-    for (int i = 0; i < kTestCount; i++)
+    timer.Start("Naive Implementation WARMUP");
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
     timer.StopAndPrint();
 
-    timer.Start("Naive Implementation ------- WARMUP ONLY");
-    for (int i = 0; i < kTestCount; i++)
+    timer.Start("Naive Implementation WARMUP");
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
@@ -102,13 +118,17 @@ int main()
 #endif
 
 
-    std::cout << "-------------------- Benchmark Starts Here --------------------" << std::endl;
+    std::cout 
+        << std::string(38, '-')
+        << " Benchmark Starts Here " 
+        << std::string(38, '-')
+        << std::endl;
 
 
 #ifdef TEST_NAIVE
     bitmap_copy = original_bitmap;
     timer.Start("Naive Implementation");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurNaive(bitmap_copy);
     }
@@ -123,7 +143,7 @@ int main()
 #ifdef TEST_LOOP_UNROLL
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 3x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll3(bitmap_copy);
     }
@@ -131,7 +151,7 @@ int main()
 
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 5x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll5(bitmap_copy);
     }
@@ -139,7 +159,7 @@ int main()
 
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 7x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll7(bitmap_copy);
     }
@@ -147,7 +167,7 @@ int main()
 
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 9x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll9(bitmap_copy);
     }
@@ -155,7 +175,7 @@ int main()
 
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 11x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll11(bitmap_copy);
     }
@@ -163,7 +183,7 @@ int main()
 
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 13x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll13(bitmap_copy);
     }
@@ -171,7 +191,7 @@ int main()
 
     bitmap_copy = original_bitmap;
     timer.Start("Loop Unroll 15x");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurLoopUnroll15(bitmap_copy);
     }
@@ -185,7 +205,7 @@ int main()
 #ifdef TEST_CACHE_OPT
     bitmap_copy = original_bitmap;
     timer.Start(std::string("Cache Optimization"));
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurCacheOpt(bitmap_copy);
     }
@@ -199,7 +219,7 @@ int main()
 #ifdef TEST_AVX
     bitmap_copy = original_bitmap;
     timer.Start("AVX");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurAVX(bitmap_copy);
     }
@@ -213,7 +233,7 @@ int main()
 #ifdef TEST_OPENMP
     bitmap_copy = original_bitmap;
     timer.Start("AVX + OpenMP Multithreading");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurImpls::BlurAVXOpenMP(bitmap_copy);
     }
@@ -229,14 +249,14 @@ int main()
 
     helper.Initialize();
 
-    //std::cout << "***************************************************************" << std::endl;
+    //std::cout << std::string(100, '*') << std::endl;
 
     //helper.PrintAllDevices();
     //cl_device_id device_id = helper.GetDeviceIdFromInput();
 
     cl_device_id device_id = helper.GetDeviceIdWithPreference(CLDeviceHelper::kPreferenceIAN);
 
-    //std::cout << "***************************************************************" << std::endl;
+    //std::cout << std::string(100, '*') << std::endl;
 
     size_t work_item_sizes[] = { bitmap_copy.width_px(),bitmap_copy.height_px() };
     size_t global_work_sizes[2]{};
@@ -246,7 +266,7 @@ int main()
         device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
     timer.Start("OpenCL on GPU - Naive");
-    for (int i = 0; i < kTestCount; i++)
+    for (int i = 0; i < test_count; i++)
     {
         BlurOpenCLZeroCopy(
             original_bitmap,
@@ -272,7 +292,7 @@ int main()
             device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
         timer.Start("OpenCL on GPU - Image");
-        for (int i = 0; i < kTestCount; i++)
+        for (int i = 0; i < test_count; i++)
         {
             BlurOpenCLImageZeroCopy(
                 original_bitmap,
@@ -296,7 +316,7 @@ int main()
             device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
         timer.Start("OpenCL on GPU - Image, WPI=4");
-        for (int i = 0; i < kTestCount; i++)
+        for (int i = 0; i < test_count; i++)
         {
             BlurOpenCLImageZeroCopy(
                 original_bitmap,
@@ -320,7 +340,7 @@ int main()
             device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
         timer.Start("OpenCL on GPU - Image, WPI=8");
-        for (int i = 0; i < kTestCount; i++)
+        for (int i = 0; i < test_count; i++)
         {
             BlurOpenCLImageZeroCopy(
                 original_bitmap,

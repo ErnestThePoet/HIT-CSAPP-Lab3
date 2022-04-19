@@ -29,7 +29,8 @@ public:
 		const double reference = -1.0,
 		const std::string& reference_name = "",
 		const TimeUnit unit = TimeUnit::MILLISECOND,
-		const std::streamsize fixedPrecision = 2);
+		const std::streamsize fixedPrecision = 2,
+		const std::streamsize width = 35);
 	double Stop(const TimeUnit unit = TimeUnit::MILLISECOND);
 
 private:
