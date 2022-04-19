@@ -78,7 +78,7 @@ void BlurOpenCLZeroCopy(
 
 #ifdef USE_TIMER
 	timer.StopAndPrint();
-	timer.Start("clEnqueueNDRangeKernel to end");
+	timer.Start("clEnqueueNDRangeKernel");
 #endif
 
 	cl_event event;
@@ -88,6 +88,11 @@ void BlurOpenCLZeroCopy(
 	CHECK_STATUS("Failed to enqueue ND range kernel.");
 
 	clWaitForEvents(1, &event);
+
+#ifdef USE_TIMER
+	timer.StopAndPrint();
+	timer.Start("clReleasexxx to end");
+#endif
 
 	clReleaseMemObject(source_pixel_data_buffer);
 	clReleaseMemObject(dest_pixel_data_buffer);
@@ -229,7 +234,7 @@ void BlurOpenCLImageZeroCopy(
 
 #ifdef USE_TIMER
 	timer.StopAndPrint();
-	timer.Start("clEnqueueNDRangeKernel to end");
+	timer.Start("clEnqueueNDRangeKernel");
 #endif
 
 	cl_event event;
@@ -239,9 +244,20 @@ void BlurOpenCLImageZeroCopy(
 	CHECK_STATUS("Failed to enqueue ND range kernel.");
 
 	clWaitForEvents(1, &event);
+
+#ifdef USE_TIMER
+	timer.StopAndPrint();
+	timer.Start("clReleasexxx to end");
+#endif
 	
 	clReleaseMemObject(source_image);
 	clReleaseMemObject(dest_image);
+	// if we only deallocate one pair, then in dubug mode
+	// with a large bmp we will receive error due to memory over-alloc. 
+	// But in release mode we receive no error. If we deallocate both, there will be
+	// a great performance hit, possibly due to GPU cache misses.
+	clReleaseMemObject(source_pixel_data_buffer);
+	clReleaseMemObject(dest_pixel_data_buffer);
 	clReleaseKernel(kernel);
 	clReleaseProgram(program);
 	clReleaseCommandQueue(command_queue);
@@ -337,6 +353,11 @@ void BlurOpenCL(
 	status |= clSetKernelArg(kernel, 2, sizeof(int32_t), &bmp_width);
 	status |= clSetKernelArg(kernel, 3, sizeof(int32_t), &bmp_height);
 	CHECK_STATUS("Failed to set kernel args.");
+
+#ifdef USE_TIMER
+	timer.StopAndPrint();
+	timer.Start("clEnqueueNDRangeKernel");
+#endif
 
 	cl_event event;
 

@@ -117,6 +117,7 @@ kernel void BlurImage(
         // 0
         // 1
         // ...
+        
         uint4 upper_pixel=read_imageui(source_image,image_sampler,(int2)(col_id,row_id-1));
         uint4 left_pixel=read_imageui(source_image,image_sampler,(int2)(col_id-1,row_id));
         uint4 center_pixel=read_imageui(source_image,image_sampler,(int2)(col_id,row_id));
