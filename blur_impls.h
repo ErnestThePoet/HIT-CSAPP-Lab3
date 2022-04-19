@@ -7,6 +7,8 @@
 
 #include <immintrin.h>
 
+#include <omp.h>
+
 #include "bitmap.h"
 
 
@@ -55,6 +57,6 @@ public:
 
 	static void BlurAVX(Bitmap& bitmap);
 
-	static void BlurOpenMP(Bitmap& bitmap);
+	static void BlurAVXOpenMP(Bitmap& bitmap);
 };
 

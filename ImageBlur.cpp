@@ -13,10 +13,11 @@ constexpr int kTestCount = 1;
 #define TEST_LOOP_UNROLL
 #define TEST_CACHE_OPT
 #define TEST_AVX
-//#define TEST_OPENMP
+#define TEST_OPENMP
 #define TEST_OPENCL
 
 //#define COMPILE_OPENCL_PROGRAM_ONLY
+#define CL_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
 
 //#define SAVE_NAIVE
 //#define SAVE_OPTIMIZATIONS
@@ -36,7 +37,7 @@ int main()
     return 0;
 #endif
     CodeTimer timer;
-    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/lines.bmp");
+    Bitmap original_bitmap = BmpHelper::Load("./bmpsrc/scenery.bmp");
 
     if (original_bitmap.info_header.bits_per_pixel != 24)
     {
@@ -209,13 +210,33 @@ int main()
 #endif
 
 
+#ifdef TEST_OPENMP
+    bitmap_copy = original_bitmap;
+    timer.Start("AVX + OpenMP Multithreading");
+    for (int i = 0; i < kTestCount; i++)
+    {
+        BlurImpls::BlurAVXOpenMP(bitmap_copy);
+    }
+    timer.StopAndPrint(naive_time);
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/openmp.bmp");
+#endif
+#endif
+
+
 #ifdef TEST_OPENCL
     bitmap_copy = original_bitmap;
 
     helper.Initialize();
-    helper.PrintAllDevices();
 
-    cl_device_id device_id = helper.GetDeviceIdFromInput();
+    //std::cout << "***************************************************************" << std::endl;
+
+    //helper.PrintAllDevices();
+    //cl_device_id device_id = helper.GetDeviceIdFromInput();
+
+    cl_device_id device_id = helper.GetDeviceIdWithPreference(CLDeviceHelper::kPreferenceIAN);
+
+    //std::cout << "***************************************************************" << std::endl;
 
     size_t work_item_sizes[] = { bitmap_copy.width_px(),bitmap_copy.height_px() };
     size_t global_work_sizes[2]{};
@@ -231,13 +252,13 @@ int main()
             original_bitmap,
             bitmap_copy, 
             device_id, 
-            //"./cl_kernels/gfx803_cl2.0_a.bin",
-            "./cl_kernels/uhd620_cl2.0_i.bin",
+            CL_PROGRAM_BINARY_NAME,
             "BlurNaive", 
             global_work_sizes, 
             local_work_sizes);
     }
     timer.StopAndPrint(naive_time);
+
 
 
     if (bitmap_copy.width_px() % 4 == 0)
@@ -257,13 +278,14 @@ int main()
                 original_bitmap,
                 bitmap_copy,
                 device_id,
-                //"./cl_kernels/gfx803_cl2.0_a.bin",
-                "./cl_kernels/uhd620_cl2.0_i.bin",
+                CL_PROGRAM_BINARY_NAME,
                 "BlurImage",
                 global_work_sizes,
                 local_work_sizes);
         }
         timer.StopAndPrint(naive_time);
+
+
 
         bitmap_copy = original_bitmap;
         // target work items on dim0: reinterpreted-width except 2 border pixels: 1-3:0; 4-7:1; 8-11:2;...
@@ -280,9 +302,32 @@ int main()
                 original_bitmap,
                 bitmap_copy,
                 device_id,
-                //"./cl_kernels/gfx803_cl2.0_a.bin",
-                "./cl_kernels/uhd620_cl2.0_i.bin",
+                CL_PROGRAM_BINARY_NAME,
                 "BlurImageWPI4",
+                global_work_sizes,
+                local_work_sizes);
+        }
+        timer.StopAndPrint(naive_time);
+
+
+
+        bitmap_copy = original_bitmap;
+        // target work items on dim0: reinterpreted-width except 2 border pixels: 1-7:0; 8-15:1; 16-23:2;...
+        // then reinterpreted-width: 3-9:0; 10-17:1; 18-25:2;...
+        work_item_sizes[0] = (bitmap_copy.width_px() * 3 / 4 - 2) / 8;
+        work_item_sizes[1] = bitmap_copy.height_px();
+        helper.GetSuitableGlobalLocalSize(
+            device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
+
+        timer.Start("OpenCL on GPU - Image, WPI=8");
+        for (int i = 0; i < kTestCount; i++)
+        {
+            BlurOpenCLImageZeroCopy(
+                original_bitmap,
+                bitmap_copy,
+                device_id,
+                CL_PROGRAM_BINARY_NAME,
+                "BlurImageWPI8",
                 global_work_sizes,
                 local_work_sizes);
         }
@@ -296,23 +341,6 @@ int main()
     BmpHelper::Save(bitmap_copy, "./blurred/opencl.bmp");
 #endif
 #endif
-
-
-#ifdef TEST_OPENMP
-    bitmap_copy = original_bitmap;
-    timer.Start("OpenMP Multithreading");
-    for (int i = 0; i < kTestCount; i++)
-    {
-        BlurImpls::BlurOpenMP(bitmap_copy);
-    }
-    timer.StopAndPrint(naive_time);
-#ifdef SAVE_OPTIMIZATIONS
-    BmpHelper::Save(bitmap_copy, "./blurred/openmp.bmp");
-#endif
-#endif
-
-
-    //BmpHelper::Save(bitmap_copy, "./blurred/naive_impl.bmp");
 
     //getchar();
 

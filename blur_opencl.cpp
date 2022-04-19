@@ -1,6 +1,6 @@
 #include "blur_opencl.h"
 
-#define USE_TIMER
+//#define USE_TIMER
 
 void BlurOpenCLZeroCopy(
 	const Bitmap& bitmap,
@@ -58,7 +58,7 @@ void BlurOpenCLZeroCopy(
 
 	cl_mem dest_pixel_data_buffer = clCreateBuffer(
 		context,
-		CL_MEM_USE_HOST_PTR|CL_MEM_WRITE_ONLY,
+		CL_MEM_USE_HOST_PTR | CL_MEM_WRITE_ONLY,
 		bitmap_dest.pixel_data_alloc_size(),
 		bitmap_dest.pixel_data(),
 		&status);
@@ -297,7 +297,7 @@ void BlurOpenCL(
 		context, 1, &device_id, binary_file_sizes, program_binaries, NULL, &status);
 	CHECK_STATUS("Failed to create program with binary.");
 
-	status = clBuildProgram(program, 1, &device_id, "-cl-std=CL2.1", NULL, NULL);
+	status = clBuildProgram(program, 1, &device_id, "", NULL, NULL);
 	CHECK_STATUS("Failed to build program.");
 
 #ifdef USE_TIMER
@@ -315,7 +315,7 @@ void BlurOpenCL(
 
 	cl_mem dest_pixel_data_buffer = clCreateBuffer(
 		context,
-		CL_MEM_COPY_HOST_PTR,
+		CL_MEM_COPY_HOST_PTR | CL_MEM_WRITE_ONLY,
 		bitmap_dest.pixel_data_alloc_size(),
 		bitmap_dest.pixel_data(),
 		&status);
