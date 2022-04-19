@@ -19,6 +19,7 @@
 #define TEST_OPENMP
 #define TEST_OPENCL
 
+// steps to change device: 1.change binary name; 2.change preference list; 3.change image function
 #define CL_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
 
 //#define SAVE_NAIVE
@@ -280,7 +281,6 @@ int main()
     timer.StopAndPrint(naive_time);
 
 
-
     if (bitmap_copy.width_px() % 4 == 0)
     {
         bitmap_copy = original_bitmap;
@@ -294,60 +294,13 @@ int main()
         timer.Start("OpenCL on GPU - Image");
         for (int i = 0; i < test_count; i++)
         {
+            // must use BlurOpenCL11ImageZeroCopy for gfx803 to avoid crashes.
             BlurOpenCLImageZeroCopy(
                 original_bitmap,
                 bitmap_copy,
                 device_id,
                 CL_PROGRAM_BINARY_NAME,
                 "BlurImage",
-                global_work_sizes,
-                local_work_sizes);
-        }
-        timer.StopAndPrint(naive_time);
-
-
-
-        bitmap_copy = original_bitmap;
-        // target work items on dim0: reinterpreted-width except 2 border pixels: 1-3:0; 4-7:1; 8-11:2;...
-        // then reinterpreted-width: 3-5:0; 6-9:1; 10-13:2;...
-        work_item_sizes[0] = (bitmap_copy.width_px() * 3 / 4 - 2) / 4;
-        work_item_sizes[1] = bitmap_copy.height_px();
-        helper.GetSuitableGlobalLocalSize(
-            device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
-
-        timer.Start("OpenCL on GPU - Image, WPI=4");
-        for (int i = 0; i < test_count; i++)
-        {
-            BlurOpenCLImageZeroCopy(
-                original_bitmap,
-                bitmap_copy,
-                device_id,
-                CL_PROGRAM_BINARY_NAME,
-                "BlurImageWPI4",
-                global_work_sizes,
-                local_work_sizes);
-        }
-        timer.StopAndPrint(naive_time);
-
-
-
-        bitmap_copy = original_bitmap;
-        // target work items on dim0: reinterpreted-width except 2 border pixels: 1-7:0; 8-15:1; 16-23:2;...
-        // then reinterpreted-width: 3-9:0; 10-17:1; 18-25:2;...
-        work_item_sizes[0] = (bitmap_copy.width_px() * 3 / 4 - 2) / 8;
-        work_item_sizes[1] = bitmap_copy.height_px();
-        helper.GetSuitableGlobalLocalSize(
-            device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
-
-        timer.Start("OpenCL on GPU - Image, WPI=8");
-        for (int i = 0; i < test_count; i++)
-        {
-            BlurOpenCLImageZeroCopy(
-                original_bitmap,
-                bitmap_copy,
-                device_id,
-                CL_PROGRAM_BINARY_NAME,
-                "BlurImageWPI8",
                 global_work_sizes,
                 local_work_sizes);
         }

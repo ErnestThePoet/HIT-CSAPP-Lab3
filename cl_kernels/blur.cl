@@ -136,153 +136,153 @@ kernel void BlurImage(
 
 
 
-kernel void BlurImageWPI4(
-    read_only image2d_t source_image,
-    write_only image2d_t dest_image,
-    const int width_reinterpret,
-    const int height){
-    // first pixel col id of current block
-    const size_t col_id=1+get_global_id(0)*WPI4;
-    const size_t row_id=get_global_id(1);
+// kernel void BlurImageWPI4(
+//     read_only image2d_t source_image,
+//     write_only image2d_t dest_image,
+//     const int width_reinterpret,
+//     const int height){
+//     // first pixel col id of current block
+//     const size_t col_id=1+get_global_id(0)*WPI4;
+//     const size_t row_id=get_global_id(1);
 
-    if(row_id>0&&row_id<height-1&&col_id+WPI4<width_reinterpret){ 
-        // col_id+WPI4-1<width_reinterpret-1, make sure right-most element to process is within boundary
+//     if(row_id>0&&row_id<height-1&&col_id+WPI4<width_reinterpret){ 
+//         // col_id+WPI4-1<width_reinterpret-1, make sure right-most element to process is within boundary
 
-        /*
-              [UPPER  PIXELS]
-           [L][CENTER PIXELS][R]
-              [LOWER  PIXELS]
-        */
+//         /*
+//               [UPPER  PIXELS]
+//            [L][CENTER PIXELS][R]
+//               [LOWER  PIXELS]
+//         */
 
-        uint16 upper_pixels=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id-1))
-        );
+//         uint16 upper_pixels=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id-1))
+//         );
 
-        uint4 left_pixel=read_imageui(source_image,image_sampler,(int2)(col_id-1,row_id));
+//         uint4 left_pixel=read_imageui(source_image,image_sampler,(int2)(col_id-1,row_id));
 
-        uint16 center_pixels=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id))
-        );
+//         uint16 center_pixels=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id))
+//         );
 
-        uint4 right_pixel=read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id));
+//         uint4 right_pixel=read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id));
 
-        uint16 lower_pixels=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id+1))
-        );
+//         uint16 lower_pixels=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id+1))
+//         );
 
-        uint16 pixel_data_sum=
-            (upper_pixels
-            +(uint16)(left_pixel.s1,left_pixel.s23,center_pixels.lo,center_pixels.hi.lo,center_pixels.hi.hi.x)
-            +(uint16)(center_pixels.s3,center_pixels.lo.hi,center_pixels.hi,right_pixel.xyz)
-            +lower_pixels)>>2;
+//         uint16 pixel_data_sum=
+//             (upper_pixels
+//             +(uint16)(left_pixel.s1,left_pixel.s23,center_pixels.lo,center_pixels.hi.lo,center_pixels.hi.hi.x)
+//             +(uint16)(center_pixels.s3,center_pixels.lo.hi,center_pixels.hi,right_pixel.xyz)
+//             +lower_pixels)>>2;
 
-        // if(row_id==1){
-        //             printf("ROW=%d COL=%d R=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
-        // (int)row_id,(int)col_id,right_pixels.s0,right_pixels.s1,right_pixels.s2,right_pixels.s3,right_pixels.s4,
-        // right_pixels.s5,right_pixels.s6,right_pixels.s7,right_pixels.s8,right_pixels.s9,right_pixels.sa,
-        // right_pixels.sb,right_pixels.sc,right_pixels.sd,right_pixels.se,right_pixels.sf);
-        // }
+//         // if(row_id==1){
+//         //             printf("ROW=%d COL=%d R=%d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n",
+//         // (int)row_id,(int)col_id,right_pixels.s0,right_pixels.s1,right_pixels.s2,right_pixels.s3,right_pixels.s4,
+//         // right_pixels.s5,right_pixels.s6,right_pixels.s7,right_pixels.s8,right_pixels.s9,right_pixels.sa,
+//         // right_pixels.sb,right_pixels.sc,right_pixels.sd,right_pixels.se,right_pixels.sf);
+//         // }
 
-        write_imageui(dest_image,(int2)(col_id,row_id),pixel_data_sum.lo.lo);
-        write_imageui(dest_image,(int2)(col_id+1,row_id),pixel_data_sum.lo.hi);
-        write_imageui(dest_image,(int2)(col_id+2,row_id),pixel_data_sum.hi.lo);
-        write_imageui(dest_image,(int2)(col_id+3,row_id),pixel_data_sum.hi.hi);
-    }
-}
+//         write_imageui(dest_image,(int2)(col_id,row_id),pixel_data_sum.lo.lo);
+//         write_imageui(dest_image,(int2)(col_id+1,row_id),pixel_data_sum.lo.hi);
+//         write_imageui(dest_image,(int2)(col_id+2,row_id),pixel_data_sum.hi.lo);
+//         write_imageui(dest_image,(int2)(col_id+3,row_id),pixel_data_sum.hi.hi);
+//     }
+// }
 
 
 
-kernel void BlurImageWPI8(
-    read_only image2d_t source_image,
-    write_only image2d_t dest_image,
-    const int width_reinterpret,
-    const int height){
-    // first pixel col id of current block
-    const size_t col_id=1+get_global_id(0)*WPI8;
-    const size_t row_id=get_global_id(1);
+// kernel void BlurImageWPI8(
+//     read_only image2d_t source_image,
+//     write_only image2d_t dest_image,
+//     const int width_reinterpret,
+//     const int height){
+//     // first pixel col id of current block
+//     const size_t col_id=1+get_global_id(0)*WPI8;
+//     const size_t row_id=get_global_id(1);
 
-    if(row_id>0&&row_id<height-1&&col_id+WPI8<width_reinterpret){ 
-        // col_id+WPI8-1<width_reinterpret-1, make sure right-most element to process is within boundary
+//     if(row_id>0&&row_id<height-1&&col_id+WPI8<width_reinterpret){ 
+//         // col_id+WPI8-1<width_reinterpret-1, make sure right-most element to process is within boundary
 
-        /*
-              [UPPER  PIXELS][UPPER  PIXELS1]
-           [L][CENTER PIXELS][CENTER PIXELS1][R]
-              [LOWER  PIXELS][LOWER  PIXELS1]
-        */
+//         /*
+//               [UPPER  PIXELS][UPPER  PIXELS1]
+//            [L][CENTER PIXELS][CENTER PIXELS1][R]
+//               [LOWER  PIXELS][LOWER  PIXELS1]
+//         */
 
-        uint16 upper_pixels=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id-1))
-        );
+//         uint16 upper_pixels=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id-1))
+//         );
 
-        uint16 upper_pixels_1=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+5,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+6,row_id-1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+7,row_id-1))
-        );
+//         uint16 upper_pixels_1=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+5,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+6,row_id-1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+7,row_id-1))
+//         );
         
-        uint4 left_pixel=read_imageui(source_image,image_sampler,(int2)(col_id-1,row_id));
+//         uint4 left_pixel=read_imageui(source_image,image_sampler,(int2)(col_id-1,row_id));
 
-        uint16 center_pixels=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id))
-        );
+//         uint16 center_pixels=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id))
+//         );
 
-        uint16 center_pixels_1=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+5,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+6,row_id)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+7,row_id))
-        );
+//         uint16 center_pixels_1=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+5,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+6,row_id)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+7,row_id))
+//         );
 
-        uint4 right_pixel=read_imageui(source_image,image_sampler,(int2)(col_id+8,row_id));
+//         uint4 right_pixel=read_imageui(source_image,image_sampler,(int2)(col_id+8,row_id));
 
-        uint16 lower_pixels=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id+1))
-        );
-        uint16 lower_pixels_1=(uint16)(
-            read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+5,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+6,row_id+1)),
-            read_imageui(source_image,image_sampler,(int2)(col_id+7,row_id+1))
-        );
+//         uint16 lower_pixels=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+1,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+2,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+3,row_id+1))
+//         );
+//         uint16 lower_pixels_1=(uint16)(
+//             read_imageui(source_image,image_sampler,(int2)(col_id+4,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+5,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+6,row_id+1)),
+//             read_imageui(source_image,image_sampler,(int2)(col_id+7,row_id+1))
+//         );
 
-        uint16 pixel_data_sum=
-            (upper_pixels
-            +(uint16)(left_pixel.s1,left_pixel.s23,center_pixels.lo,center_pixels.hi.lo,center_pixels.hi.hi.x)
-            +(uint16)(center_pixels.s3,center_pixels.lo.hi,center_pixels.hi,center_pixels_1.xyz)
-            +lower_pixels)>>2;
+//         uint16 pixel_data_sum=
+//             (upper_pixels
+//             +(uint16)(left_pixel.s1,left_pixel.s23,center_pixels.lo,center_pixels.hi.lo,center_pixels.hi.hi.x)
+//             +(uint16)(center_pixels.s3,center_pixels.lo.hi,center_pixels.hi,center_pixels_1.xyz)
+//             +lower_pixels)>>2;
 
-        uint16 pixel_data_sum_1=
-            (upper_pixels_1
-            +(uint16)(center_pixels.sd,center_pixels.sef,center_pixels_1.lo,center_pixels_1.hi.lo,center_pixels_1.hi.hi.x)
-            +(uint16)(center_pixels_1.s3,center_pixels_1.lo.hi,center_pixels_1.hi,right_pixel.xyz)
-            +lower_pixels_1)>>2;
+//         uint16 pixel_data_sum_1=
+//             (upper_pixels_1
+//             +(uint16)(center_pixels.sd,center_pixels.sef,center_pixels_1.lo,center_pixels_1.hi.lo,center_pixels_1.hi.hi.x)
+//             +(uint16)(center_pixels_1.s3,center_pixels_1.lo.hi,center_pixels_1.hi,right_pixel.xyz)
+//             +lower_pixels_1)>>2;
 
-        write_imageui(dest_image,(int2)(col_id,row_id),pixel_data_sum.lo.lo);
-        write_imageui(dest_image,(int2)(col_id+1,row_id),pixel_data_sum.lo.hi);
-        write_imageui(dest_image,(int2)(col_id+2,row_id),pixel_data_sum.hi.lo);
-        write_imageui(dest_image,(int2)(col_id+3,row_id),pixel_data_sum.hi.hi);
-        write_imageui(dest_image,(int2)(col_id+4,row_id),pixel_data_sum_1.lo.lo);
-        write_imageui(dest_image,(int2)(col_id+5,row_id),pixel_data_sum_1.lo.hi);
-        write_imageui(dest_image,(int2)(col_id+6,row_id),pixel_data_sum_1.hi.lo);
-        write_imageui(dest_image,(int2)(col_id+7,row_id),pixel_data_sum_1.hi.hi);
-    }
-}
+//         write_imageui(dest_image,(int2)(col_id,row_id),pixel_data_sum.lo.lo);
+//         write_imageui(dest_image,(int2)(col_id+1,row_id),pixel_data_sum.lo.hi);
+//         write_imageui(dest_image,(int2)(col_id+2,row_id),pixel_data_sum.hi.lo);
+//         write_imageui(dest_image,(int2)(col_id+3,row_id),pixel_data_sum.hi.hi);
+//         write_imageui(dest_image,(int2)(col_id+4,row_id),pixel_data_sum_1.lo.lo);
+//         write_imageui(dest_image,(int2)(col_id+5,row_id),pixel_data_sum_1.lo.hi);
+//         write_imageui(dest_image,(int2)(col_id+6,row_id),pixel_data_sum_1.hi.lo);
+//         write_imageui(dest_image,(int2)(col_id+7,row_id),pixel_data_sum_1.hi.hi);
+//     }
+// }

@@ -1,4 +1,7 @@
 #pragma once
+
+#pragma warning(disable:4996)
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -21,6 +24,7 @@ void BlurOpenCLZeroCopy(
 	const size_t * global_work_sizes,
 	const size_t * local_work_sizes);
 
+
 // bmp must have a width that is a multiple of 4
 void BlurOpenCLImageZeroCopy(
 	const Bitmap & bitmap,
@@ -32,7 +36,18 @@ void BlurOpenCLImageZeroCopy(
 	const size_t * local_work_sizes);
 
 
-void BlurOpenCL(
+// use OpenCL 1.1 clCreateImage2D API. gfx803 must use this to avoid crashes.
+void BlurOpenCL11ImageZeroCopy(
+	const Bitmap & bitmap,
+	Bitmap & bitmap_dest,
+	const cl_device_id device_id,
+	const std::string & binary_file_name,
+	const std::string & function_name,
+	const size_t * global_work_sizes,
+	const size_t * local_work_sizes);
+
+
+void BlurOpenCLCopyHostPtr(
 	const Bitmap & bitmap,
 	Bitmap & bitmap_dest,
 	const cl_device_id device_id,
