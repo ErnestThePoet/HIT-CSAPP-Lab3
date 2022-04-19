@@ -90,6 +90,11 @@ cl_device_id CLDeviceHelper::GetDeviceIdFromInput() const
 
 void CLDeviceHelper::Initialize()
 {
+    if (this->is_initialized_)
+    {
+        return;
+    }
+
     cl_int status = CL_SUCCESS;
 
     cl_uint platform_count = 0;

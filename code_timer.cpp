@@ -1,9 +1,5 @@
 #include "code_timer.h"
 
-std::string CodeTimer::name_;
-std::chrono::steady_clock::time_point CodeTimer::start_time_;
-bool CodeTimer::is_started_ = false;
-
 void CodeTimer::Start()
 {
 	Start("");
@@ -23,7 +19,7 @@ void CodeTimer::Start(const std::string& name)
 	is_started_ = true;
 }
 
-double CodeTimer::EndAndPrint(
+double CodeTimer::StopAndPrint(
 	const double reference,
 	const std::string& reference_name,
 	const TimeUnit unit, 
@@ -36,7 +32,7 @@ double CodeTimer::EndAndPrint(
 		return 0.0;
 	}
 
-	auto elapse = End();
+	auto elapse = Stop();
 
 	std::cout << std::fixed << std::setprecision(fixedPrecision);
 
@@ -92,7 +88,7 @@ double CodeTimer::EndAndPrint(
 	return elapse;
 }
 
-double CodeTimer::End(const TimeUnit unit)
+double CodeTimer::Stop(const TimeUnit unit)
 {
 	if (!is_started_)
 	{

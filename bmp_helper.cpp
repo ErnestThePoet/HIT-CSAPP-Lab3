@@ -27,7 +27,7 @@ Bitmap BmpHelper::Load(const std::string& file_name)
 		// row count
 		* abs(bitmap.info_header.height_px);
 
-	bitmap.alloc_4096_aligned_pixel_data(bmp_data_size);
+	bitmap.Alloc4096AlignedPixelData(bmp_data_size);
 
 	if (bitmap.pixel_data() == NULL)
 	{

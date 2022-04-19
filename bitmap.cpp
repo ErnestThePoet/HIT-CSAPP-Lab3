@@ -1,6 +1,6 @@
 #include "bitmap.h"
 
-void Bitmap::alloc_4096_aligned_pixel_data(size_t size)
+void Bitmap::Alloc4096AlignedPixelData(size_t size)
 {
 	// ensure a multiple of 64-byte
 	size_t actual_alloc_size =
@@ -20,12 +20,12 @@ void Bitmap::alloc_4096_aligned_pixel_data(size_t size)
 	if (this->pixel_data_ == NULL)
 	{
 		std::cerr << BRACKETED_LINE("Failed to allocate bitmap pixel data buffer.");
-		this->pixel_data_size_ = this->alloc_size_ = 0;
+		this->pixel_data_size_ = this->pixel_data_alloc_size_ = 0;
 	}
 	else
 	{
 		this->pixel_data_size_ = size;
-		this->alloc_size_ = actual_alloc_size;
+		this->pixel_data_alloc_size_ = actual_alloc_size;
 	}
 }
 
@@ -37,6 +37,11 @@ uint8_t* Bitmap::pixel_data() const
 size_t Bitmap::pixel_data_size() const
 {
 	return this->pixel_data_size_;
+}
+
+size_t Bitmap::pixel_data_alloc_size() const
+{
+	return this->pixel_data_alloc_size_;
 }
 
 int32_t Bitmap::width_px() const

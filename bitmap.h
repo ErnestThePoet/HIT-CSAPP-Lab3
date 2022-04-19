@@ -46,7 +46,7 @@ public:
 		uint8_t reserved;
 	};
 
-	Bitmap() :pixel_data_(NULL), pixel_data_size_(0), alloc_size_(0) {}
+	Bitmap() :pixel_data_(NULL), pixel_data_size_(0), pixel_data_alloc_size_(0) {}
 	~Bitmap()
 	{
 		if (this->pixel_data_)
@@ -73,9 +73,10 @@ public:
 
 	// be sure to check pixel_data() to confirm whether successfully allocated
 	// just provide bmp padded pixel data size. auto align memory that is a multiple of 64-byte
-	void alloc_4096_aligned_pixel_data(size_t pixel_data_size);
+	void Alloc4096AlignedPixelData(size_t pixel_data_size);
 	uint8_t* pixel_data() const;
 	size_t pixel_data_size() const;
+	size_t pixel_data_alloc_size() const;
 
 	int32_t width_px() const;
 	int32_t height_px() const;
@@ -86,7 +87,7 @@ private:
 	// actual padded size of bmp data, used to read/write bmp
 	size_t pixel_data_size_ = 0;
 	// allocated size that is a multiple of 64-byte
-	size_t alloc_size_ = 0;
+	size_t pixel_data_alloc_size_ = 0;
 
 	void CopyFromBitmap(const Bitmap& bitmap)
 	{
@@ -97,11 +98,14 @@ private:
 		this->info_header = bitmap.info_header;
 		this->palettes = bitmap.palettes;
 
-		this->alloc_4096_aligned_pixel_data(bitmap.alloc_size_);
+		this->Alloc4096AlignedPixelData(bitmap.pixel_data_alloc_size_);
 
 		if (this->pixel_data_ != NULL)
 		{
-			std::copy(bitmap.pixel_data_, bitmap.pixel_data_ + bitmap.alloc_size_, this->pixel_data_);
+			std::copy(
+				bitmap.pixel_data_, 
+				bitmap.pixel_data_ + bitmap.pixel_data_alloc_size_, 
+				this->pixel_data_);
 		}
 	}
 };

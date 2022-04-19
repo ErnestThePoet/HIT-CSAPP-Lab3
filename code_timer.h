@@ -17,19 +17,24 @@ public:
 		SECOND
 	};
 
-	static void Start();
-	static void Start(const std::string& name);
+	CodeTimer():is_started_(false){}
+	~CodeTimer() = default;
+	CodeTimer(const CodeTimer& timer) = delete;
+	CodeTimer& operator=(const CodeTimer& timer) = delete;
+
+	void Start();
+	void Start(const std::string& name);
 	// pass a negative reference to disable reference
-	static double EndAndPrint(
+	double StopAndPrint(
 		const double reference = -1.0,
 		const std::string& reference_name = "",
 		const TimeUnit unit = TimeUnit::MILLISECOND,
 		const std::streamsize fixedPrecision = 2);
-	static double End(const TimeUnit unit = TimeUnit::MILLISECOND);
+	double Stop(const TimeUnit unit = TimeUnit::MILLISECOND);
 
 private:
-	static std::string name_;
-	static std::chrono::steady_clock::time_point start_time_;
-	static bool is_started_;
+	std::string name_;
+	std::chrono::steady_clock::time_point start_time_;
+	bool is_started_ = false;
 };
 
