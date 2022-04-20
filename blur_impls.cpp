@@ -458,95 +458,51 @@ void BlurImpls::BlurAVX(Bitmap& bitmap)
 	}
 }
 
-void BlurImpls::BlurAVXOpenMP(Bitmap& bitmap)
+void BlurImpls::BlurOpenMP(const Bitmap& bitmap, Bitmap& dest_bitmap)
 {
-	// pixels per inner loop
-	constexpr int32_t kWpl = 32;
-
 	int32_t width_px = bitmap.width_px();
 	int32_t height_px = bitmap.height_px();
 	int32_t bytes_per_row = ((width_px * bytes_per_px - 1) / 4 + 1) * 4;
 
-	std::vector<uint8_t> pixel_store_1(bytes_per_px * width_px);
-	// copy first row data (except right paddings)
-	std::copy(
-		bitmap.pixel_data(),
-		bitmap.pixel_data() + bytes_per_px * width_px,
-		pixel_store_1.begin());
-
-	std::vector<uint8_t> pixel_store_2(bytes_per_px * width_px);
-	// copy second row data (except right paddings)
-	std::copy(
-		bitmap.pixel_data() + bytes_per_row,
-		bitmap.pixel_data() + bytes_per_row + bytes_per_px * width_px,
-		pixel_store_2.begin());
-
-	uint8_t* const pixel_data = bitmap.pixel_data();
-	uint8_t* upper_row_pixels = pixel_store_1.data();
-	uint8_t* current_row_pixels = pixel_store_2.data();
-
-	int32_t inner_loop_ubound = bytes_per_px * width_px - bytes_per_px - kWpl + 1;
-	static const __m256i kPackedSrliMask = _mm256_set1_epi16((short)0xFCFF);
+	const uint8_t* const source_pixel_data = bitmap.pixel_data();
+	uint8_t* const dest_pixel_data = dest_bitmap.pixel_data();
 
 #pragma omp parallel for
 	for (int32_t i = 1; i < height_px - 1; i++)
 	{
 		int32_t current_row_offset = i * bytes_per_row;
+		int32_t upper_row_offset = current_row_offset - bytes_per_row;
 		int32_t lower_row_offset = current_row_offset + bytes_per_row;
 
-		for (int32_t j = bytes_per_px; j < inner_loop_ubound; j += kWpl)
+		for (int32_t j = 1; j < width_px - 1; j++)
 		{
-			int32_t current_total_offset = current_row_offset + j;
+			// Beginning index of current pixel data.
+			int32_t current_pixel_offset = j * bytes_per_px;
 
-			__m256i packed_pixel_data_upper =
-				_mm256_loadu_si256((__m256i*)(upper_row_pixels + j));
+			int32_t current_total_offset = current_row_offset + current_pixel_offset;
+			int32_t l_index = current_total_offset - bytes_per_px;
+			int32_t r_index = current_total_offset + bytes_per_px;
+			int32_t upper_index = upper_row_offset + current_pixel_offset;
+			int32_t lower_index = lower_row_offset + current_pixel_offset;
 
-			__m256i packed_pixel_data_l =
-				_mm256_loadu_si256((__m256i*)(current_row_pixels + j - bytes_per_px));
+			// UP+L+R+DOWN
+			dest_pixel_data[current_total_offset] =
+				((uint32_t)source_pixel_data[upper_index])
+				+ (source_pixel_data[l_index])
+				+ (source_pixel_data[r_index])
+				+ (source_pixel_data[lower_index]) >> 2;
 
-			__m256i packed_pixel_data_r =
-				_mm256_loadu_si256((__m256i*)(pixel_data + current_total_offset + bytes_per_px));
+			dest_pixel_data[current_total_offset + 1] =
+				((uint32_t)source_pixel_data[upper_index + 1])
+				+ (source_pixel_data[l_index + 1])
+				+ (source_pixel_data[r_index + 1])
+				+ (source_pixel_data[lower_index + 1]) >> 2;
 
-			__m256i packed_pixel_data_lower =
-				_mm256_loadu_si256((__m256i*)(pixel_data + lower_row_offset + j));
-
-			// emulate _mm256_srli_epi8 with _mm256_srli_epi16 and _mm256_and_si256:
-			// 1. and the original pack to set the lowest 2 bits of each even-indexed byte to 0.
-			// 2. then _mm256_srli_epi16 by 2 and we get a result as if each byte in original pack
-			//    is _mm256_srli_epi8 shifted by 2.
-
-			packed_pixel_data_upper = _mm256_and_si256(packed_pixel_data_upper, kPackedSrliMask);
-			packed_pixel_data_upper = _mm256_srli_epi16(packed_pixel_data_upper, 2);
-
-			packed_pixel_data_l = _mm256_and_si256(packed_pixel_data_l, kPackedSrliMask);
-			packed_pixel_data_l = _mm256_srli_epi16(packed_pixel_data_l, 2);
-
-			packed_pixel_data_r = _mm256_and_si256(packed_pixel_data_r, kPackedSrliMask);
-			packed_pixel_data_r = _mm256_srli_epi16(packed_pixel_data_r, 2);
-
-			packed_pixel_data_lower = _mm256_and_si256(packed_pixel_data_lower, kPackedSrliMask);
-			packed_pixel_data_lower = _mm256_srli_epi16(packed_pixel_data_lower, 2);
-
-
-			__m256i packed_avg_pixel_data = _mm256_add_epi8(
-				_mm256_add_epi8(
-					packed_pixel_data_upper,
-					packed_pixel_data_l
-				),
-				_mm256_add_epi8(
-					packed_pixel_data_r,
-					packed_pixel_data_lower
-				)
-			);
-
-			_mm256_storeu_si256((__m256i*)(pixel_data + current_total_offset), packed_avg_pixel_data);
+			dest_pixel_data[current_total_offset + 2] =
+				((uint32_t)source_pixel_data[upper_index + 2])
+				+ (source_pixel_data[l_index + 2])
+				+ (source_pixel_data[r_index + 2])
+				+ (source_pixel_data[lower_index + 2]) >> 2;
 		}
-
-		std::copy(
-			pixel_data + lower_row_offset,
-			pixel_data + lower_row_offset + bytes_per_px * width_px,
-			upper_row_pixels);
-
-		std::swap(upper_row_pixels, current_row_pixels);
 	}
 }

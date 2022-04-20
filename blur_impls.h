@@ -57,6 +57,6 @@ public:
 
 	static void BlurAVX(Bitmap& bitmap);
 
-	static void BlurAVXOpenMP(Bitmap& bitmap);
+	static void BlurOpenMP(const Bitmap& bitmap, Bitmap& dest_bitmap);
 };
 

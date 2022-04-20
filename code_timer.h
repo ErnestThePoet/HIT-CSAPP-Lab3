@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <iomanip>
@@ -32,6 +33,15 @@ public:
 		const std::streamsize fixedPrecision = 2,
 		const std::streamsize width = 35);
 	double Stop(const TimeUnit unit = TimeUnit::MILLISECOND);
+
+	void PrintElapse(
+		const double time,
+		const std::string& name = "",
+		const double reference = -1.0,
+		const std::string& reference_name = "",
+		const TimeUnit unit = TimeUnit::MILLISECOND,
+		const std::streamsize fixedPrecision = 2,
+		const std::streamsize width = 35) const;
 
 private:
 	std::string name_;

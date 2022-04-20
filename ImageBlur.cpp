@@ -9,8 +9,6 @@
 #include "cl_device_helper.h"
 
 
-//#define COMPILE_OPENCL_PROGRAM_ONLY
-
 #define USE_WARMUP
 #define TEST_NAIVE
 #define TEST_LOOP_UNROLL
@@ -19,8 +17,10 @@
 #define TEST_OPENMP
 #define TEST_OPENCL
 
-// steps to change device: 1.change binary name; 2.change preference list; 3.change image function
-#define CL_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
+
+#define UHD620_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
+#define GFX803_PROGRAM_BINARY_NAME "./cl_kernels/gfx803_cl2.0_i.bin"
+
 
 //#define SAVE_NAIVE
 //#define SAVE_OPTIMIZATIONS
@@ -30,15 +30,6 @@
 int main()
 {
     CLDeviceHelper helper;
-
-#ifdef COMPILE_OPENCL_PROGRAM_ONLY
-    helper.Initialize();
-    helper.PrintAllDevices();
-    cl_device_id compile_target_device_id = helper.GetDeviceIdFromInput();
-
-    CompileOpenCLKernelBinary(compile_target_device_id,"-cl-std=CL2.0");
-    return 0;
-#endif
 
     CodeTimer timer;
 
@@ -233,10 +224,10 @@ int main()
 
 #ifdef TEST_OPENMP
     bitmap_copy = original_bitmap;
-    timer.Start("AVX + OpenMP Multithreading");
+    timer.Start("OpenMP Multithreading");
     for (int i = 0; i < test_count; i++)
     {
-        BlurImpls::BlurAVXOpenMP(bitmap_copy);
+        BlurImpls::BlurOpenMP(original_bitmap, bitmap_copy);
     }
     timer.StopAndPrint(naive_time);
 #ifdef SAVE_OPTIMIZATIONS
@@ -250,12 +241,13 @@ int main()
 
     helper.Initialize();
 
-    //std::cout << std::string(100, '*') << std::endl;
+    std::cout << std::string(100, '*') << std::endl;
 
     //helper.PrintAllDevices();
     //cl_device_id device_id = helper.GetDeviceIdFromInput();
 
-    cl_device_id device_id = helper.GetDeviceIdWithPreference(CLDeviceHelper::kPreferenceIAN);
+    cl_device_id uhd620_device_id = helper.GetDeviceIdWithPreference(CLDeviceHelper::kPreferenceIAN);
+    cl_device_id gfx803_device_id = helper.GetDeviceIdWithPreference(CLDeviceHelper::kPreferenceANI);
 
     //std::cout << std::string(100, '*') << std::endl;
 
@@ -264,21 +256,48 @@ int main()
     size_t local_work_sizes[2]{};
 
     helper.GetSuitableGlobalLocalSize(
-        device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
+        uhd620_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
-    timer.Start("OpenCL on GPU - Naive");
+    double nd_range_time = 0.0;
+
+    timer.Start("OpenCL - Intel Zero-Copy Naive");
     for (int i = 0; i < test_count; i++)
     {
-        BlurOpenCLZeroCopy(
+        BlurOpenCL::BlurOpenCLZeroCopy(
             original_bitmap,
             bitmap_copy, 
-            device_id, 
-            CL_PROGRAM_BINARY_NAME,
+            uhd620_device_id,
+            UHD620_PROGRAM_BINARY_NAME,
             "BlurNaive", 
             global_work_sizes, 
-            local_work_sizes);
+            local_work_sizes,
+            nd_range_time);
     }
     timer.StopAndPrint(naive_time);
+    timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+    std::cout << std::endl;
+
+
+
+    bitmap_copy = original_bitmap;
+
+    timer.Start("OpenCL - AMD Naive");
+    for (int i = 0; i < test_count; i++)
+    {
+        BlurOpenCL::BlurOpenCLCopyHostPtr(
+            original_bitmap,
+            bitmap_copy,
+            gfx803_device_id,
+            GFX803_PROGRAM_BINARY_NAME,
+            "BlurNaive",
+            global_work_sizes,
+            local_work_sizes,
+            nd_range_time);
+    }
+    timer.StopAndPrint(naive_time);
+    timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+    std::cout << std::endl;
+
 
 
     if (bitmap_copy.width_px() % 4 == 0)
@@ -289,22 +308,45 @@ int main()
         work_item_sizes[1] = bitmap_copy.height_px();
 
         helper.GetSuitableGlobalLocalSize(
-            device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
+            uhd620_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
-        timer.Start("OpenCL on GPU - Image");
+        timer.Start("OpenCL - Intel Zero-Copy using Image");
         for (int i = 0; i < test_count; i++)
         {
-            // must use BlurOpenCL11ImageZeroCopy for gfx803 to avoid crashes.
-            BlurOpenCLImageZeroCopy(
+            BlurOpenCL::BlurOpenCLImageZeroCopy(
                 original_bitmap,
                 bitmap_copy,
-                device_id,
-                CL_PROGRAM_BINARY_NAME,
+                uhd620_device_id,
+                UHD620_PROGRAM_BINARY_NAME,
                 "BlurImage",
                 global_work_sizes,
-                local_work_sizes);
+                local_work_sizes,
+                nd_range_time);
         }
         timer.StopAndPrint(naive_time);
+        timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+        std::cout << std::endl;
+
+
+
+        bitmap_copy = original_bitmap;
+
+        timer.Start("OpenCL - AMD using Image");
+        for (int i = 0; i < test_count; i++)
+        {
+            BlurOpenCL::BlurOpenCL11ImageCopyHostPtr(
+                original_bitmap,
+                bitmap_copy,
+                gfx803_device_id,
+                GFX803_PROGRAM_BINARY_NAME,
+                "BlurImage",
+                global_work_sizes,
+                local_work_sizes,
+                nd_range_time);
+        }
+        timer.StopAndPrint(naive_time);
+        timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+        std::cout << std::endl;
     }
     else
     {
