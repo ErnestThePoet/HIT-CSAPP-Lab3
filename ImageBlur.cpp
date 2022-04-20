@@ -260,7 +260,7 @@ int main()
 
     double nd_range_time = 0.0;
 
-    timer.Start("OpenCL - Intel Zero-Copy Naive");
+    timer.Start("OpenCL - Intel UHD620 Zero-Copy Naive");
     for (int i = 0; i < test_count; i++)
     {
         BlurOpenCL::BlurOpenCLZeroCopy(
@@ -281,7 +281,7 @@ int main()
 
     bitmap_copy = original_bitmap;
 
-    timer.Start("OpenCL - AMD Naive");
+    timer.Start("OpenCL - AMD RX550X CopyHostPtr");
     for (int i = 0; i < test_count; i++)
     {
         BlurOpenCL::BlurOpenCLCopyHostPtr(
@@ -310,7 +310,7 @@ int main()
         helper.GetSuitableGlobalLocalSize(
             uhd620_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
-        timer.Start("OpenCL - Intel Zero-Copy using Image");
+        timer.Start("OpenCL - Intel UHD620 Zero-Copy using Image");
         for (int i = 0; i < test_count; i++)
         {
             BlurOpenCL::BlurOpenCLImageZeroCopy(
@@ -331,7 +331,7 @@ int main()
 
         bitmap_copy = original_bitmap;
 
-        timer.Start("OpenCL - AMD using Image");
+        timer.Start("OpenCL - AMD RX550X CopyHostPtr using Image");
         for (int i = 0; i < test_count; i++)
         {
             BlurOpenCL::BlurOpenCL11ImageCopyHostPtr(
@@ -356,8 +356,6 @@ int main()
     BmpHelper::Save(bitmap_copy, "./blurred/opencl.bmp");
 #endif
 #endif
-
-    //getchar();
 
     return 0;
 }

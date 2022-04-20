@@ -100,17 +100,17 @@ void CLDeviceHelper::Initialize()
     cl_uint platform_count = 0;
     status = clGetPlatformIDs(0, nullptr, &platform_count);
 
-    CHECK_STATUS("Failed to get OpenCL platform count",status);
+    CHECK_STATUS("Failed to get OpenCL platform count.",status);
 
     if (platform_count == 0)
     {
-        throw std::runtime_error("No OpenCL-capable platform found");
+        throw std::runtime_error("No OpenCL-capable platform found.");
     }
 
     std::vector<cl_platform_id> platform_ids(platform_count);
 
     status = clGetPlatformIDs(platform_count, platform_ids.data(), nullptr);
-    CHECK_STATUS("Failed to get OpenCL platform IDs", status);
+    CHECK_STATUS("Failed to get OpenCL platform IDs.", status);
 
     for (auto i : platform_ids)
     {
@@ -119,7 +119,7 @@ void CLDeviceHelper::Initialize()
         size_t platform_name_length = 0;
 
         status = clGetPlatformInfo(i, CL_PLATFORM_NAME, 0, nullptr, &platform_name_length);
-        CHECK_STATUS("Failed to get OpenCL platform name length", status);
+        CHECK_STATUS("Failed to get OpenCL platform name length.", status);
 
         std::vector<char> platform_name_buffer(platform_name_length);
 
@@ -129,13 +129,13 @@ void CLDeviceHelper::Initialize()
             platform_name_length, 
             platform_name_buffer.data(), 
             nullptr);
-        CHECK_STATUS("Failed to get OpenCL platform name", status);
+        CHECK_STATUS("Failed to get OpenCL platform name.", status);
 
         // Platform vendor
         size_t platform_vendor_length = 0;
 
         status = clGetPlatformInfo(i, CL_PLATFORM_VENDOR, 0, nullptr, &platform_vendor_length);
-        CHECK_STATUS("Failed to get OpenCL platform vendor length", status);
+        CHECK_STATUS("Failed to get OpenCL platform vendor name length.", status);
 
         std::vector<char> platform_vendor_buffer(platform_vendor_length);
 
@@ -145,7 +145,7 @@ void CLDeviceHelper::Initialize()
             platform_vendor_length,
             platform_vendor_buffer.data(),
             nullptr);
-        CHECK_STATUS("Failed to get OpenCL platform vendor", status);
+        CHECK_STATUS("Failed to get OpenCL platform vendor.", status);
 
         for (int j = 0; j < platform_vendor_length; j++)
         {
