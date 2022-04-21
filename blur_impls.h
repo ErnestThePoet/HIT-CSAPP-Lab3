@@ -7,6 +7,12 @@
 
 #include <immintrin.h>
 
+#include "macros.h"
+
+#ifdef ARM
+#include <arm_neon.h>
+#endif
+
 #include <omp.h>
 
 #include "bitmap.h"
@@ -55,7 +61,13 @@ public:
 
 	static void BlurCacheOpt(Bitmap& bitmap);
 
+#ifndef ARM
 	static void BlurAVX(Bitmap& bitmap);
+#endif
+
+#ifdef ARM
+	static void BlurNeon(Bitmap& bitmap);
+#endif
 
 	static void BlurOpenMP(const Bitmap& bitmap, Bitmap& dest_bitmap);
 };

@@ -4,13 +4,13 @@
 #define WPI16 16
 
 
-
 kernel void BlurNaive(
     const global uchar* source_pixel_data,
     global uchar* dest_pixel_data,
     const int width,
     const int height){
     
+    // pixel row&col id
     const size_t col_id=get_global_id(0);
     const size_t row_id=get_global_id(1);
 
@@ -42,7 +42,6 @@ kernel void BlurNaive(
             +source_pixel_data[lower_total_offset+2])>>2;
     }
 }
-
 
 
 /////////////////////////////////////////////////////////////////////////
@@ -133,7 +132,6 @@ kernel void BlurImage(
         write_imageui(dest_image,(int2)(col_id,row_id),pixel_data_sum>>2);
     }
 }
-
 
 
 // kernel void BlurImageWPI4(

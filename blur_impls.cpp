@@ -280,23 +280,17 @@ void BlurImpls::BlurCacheOpt(Bitmap& bitmap)
 	int32_t height_px = bitmap.height_px();
 	int32_t bytes_per_row = ((width_px * bytes_per_px - 1) / 4 + 1) * 4;
 
-	std::vector<uint8_t> pixel_store_1(bytes_per_px * width_px);
+	std::vector<uint8_t> pixel_store(bytes_per_px * width_px);
 	// copy first row data (except right paddings)
 	std::copy(
 		bitmap.pixel_data(),
 		bitmap.pixel_data()+bytes_per_px * width_px,
-		pixel_store_1.begin());
+		pixel_store.begin());
 
-	std::vector<uint8_t> pixel_store_2(bytes_per_px * width_px);
-	// copy second row data (except right paddings)
-	std::copy(
-		bitmap.pixel_data()+bytes_per_row,
-		bitmap.pixel_data()+bytes_per_row + bytes_per_px * width_px,
-		pixel_store_2.begin());
+	pixel_store[0] = bitmap.pixel_data()[bytes_per_row];
 
 	uint8_t* const pixel_data = bitmap.pixel_data();
-	uint8_t* upper_row_pixels = pixel_store_1.data();
-	uint8_t* current_row_pixels = pixel_store_2.data();
+	uint8_t* stored_row_pixels = pixel_store.data();
 
 
 	int32_t inner_loop_ubound = bytes_per_px * width_px - bytes_per_px;
@@ -316,21 +310,15 @@ void BlurImpls::BlurCacheOpt(Bitmap& bitmap)
 			int32_t lower_index = lower_row_offset + j;
 
 			uint32_t avg_b =
-				(upper_row_pixels[j]);
+				(stored_row_pixels[j - 3] + stored_row_pixels[j]);
 			uint32_t avg_g =
-				(upper_row_pixels[j + 1]);
+				(stored_row_pixels[j - 2] + stored_row_pixels[j + 1]);
 			uint32_t avg_r =
-				(upper_row_pixels[j + 2]);
+				(stored_row_pixels[j - 1] + stored_row_pixels[j + 2]);
 
-
-			avg_b +=
-				(current_row_pixels[l_index]);
-			avg_g +=
-				(current_row_pixels[l_index + 1]);
-			avg_r +=
-				(current_row_pixels[l_index + 2]);
-
-
+			stored_row_pixels[j] = pixel_data[current_total_offset];
+			stored_row_pixels[j + 1] = pixel_data[current_total_offset + 1];
+			stored_row_pixels[j + 2] = pixel_data[current_total_offset + 2];
 
 			avg_b +=
 				(pixel_data[r_index]);
@@ -339,8 +327,6 @@ void BlurImpls::BlurCacheOpt(Bitmap& bitmap)
 			avg_r +=
 				(pixel_data[r_index + 2]);
 
-
-
 			avg_b +=
 				(pixel_data[lower_index]);
 			avg_g +=
@@ -348,23 +334,14 @@ void BlurImpls::BlurCacheOpt(Bitmap& bitmap)
 			avg_r +=
 				(pixel_data[lower_index + 2]);
 
-
-
 			pixel_data[current_total_offset] = avg_b >> 2;
 			pixel_data[current_total_offset + 1] = avg_g >> 2;
 			pixel_data[current_total_offset + 2] = avg_r >> 2;
 		}
-
-
-		std::copy(
-			pixel_data + lower_row_offset,
-			pixel_data + lower_row_offset + bytes_per_px * width_px,
-			upper_row_pixels);
-
-		std::swap(upper_row_pixels, current_row_pixels);
 	}
 }
 
+#ifndef ARM
 // requires AVX, AVX2
 void BlurImpls::BlurAVX(Bitmap& bitmap)
 {
@@ -457,6 +434,12 @@ void BlurImpls::BlurAVX(Bitmap& bitmap)
 		std::swap(upper_row_pixels, current_row_pixels);
 	}
 }
+#endif
+
+#ifdef ARM
+void BlurImpls::BlurNeon(Bitmap& bitmap)
+{}
+#endif
 
 void BlurImpls::BlurOpenMP(const Bitmap& bitmap, Bitmap& dest_bitmap)
 {

@@ -164,6 +164,7 @@
     <ClInclude Include="bmp_helper.h" />
     <ClInclude Include="cl_device_helper.h" />
     <ClInclude Include="code_timer.h" />
+    <ClInclude Include="macros.h" />
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <ItemGroup>

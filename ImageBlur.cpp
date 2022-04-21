@@ -1,30 +1,23 @@
 #include <iostream>
 #include <string>
 
+#include "macros.h"
+
 #include "bmp_helper.h"
 #include "code_timer.h"
 
 #include "blur_impls.h"
+
+#ifdef OPENCL
 #include "blur_opencl.h"
+#endif
+
 #include "cl_device_helper.h"
 
-
-#define USE_WARMUP
-#define TEST_NAIVE
-#define TEST_LOOP_UNROLL
-#define TEST_CACHE_OPT
-#define TEST_AVX
-#define TEST_OPENMP
-#define TEST_OPENCL
 
 
 #define UHD620_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
 #define GFX803_PROGRAM_BINARY_NAME "./cl_kernels/gfx803_cl2.0_i.bin"
-
-
-//#define SAVE_NAIVE
-//#define SAVE_OPTIMIZATIONS
-//#define SAVE_OPENCL
 
 
 int main()
@@ -202,13 +195,14 @@ int main()
         BlurImpls::BlurCacheOpt(bitmap_copy);
     }
     timer.StopAndPrint(naive_time);
+    BmpHelper::Save(bitmap_copy, "./blurred/cache_opt.bmp");
 #ifdef SAVE_OPTIMIZATIONS
     BmpHelper::Save(bitmap_copy, "./blurred/cache_opt.bmp");
 #endif
 #endif
 
 
-#ifdef TEST_AVX
+#if defined(TEST_SIMD)&&!defined(ARM)
     bitmap_copy = original_bitmap;
     timer.Start("AVX");
     for (int i = 0; i < test_count; i++)
@@ -218,6 +212,19 @@ int main()
     timer.StopAndPrint(naive_time);
 #ifdef SAVE_OPTIMIZATIONS
     BmpHelper::Save(bitmap_copy, "./blurred/avx.bmp");
+#endif
+#endif
+
+#if defined(TEST_SIMD)&&defined(ARM)
+    bitmap_copy = original_bitmap;
+    timer.Start("Arm Neon");
+    for (int i = 0; i < test_count; i++)
+    {
+        BlurImpls::BlurNeon(bitmap_copy);
+    }
+    timer.StopAndPrint(naive_time);
+#ifdef SAVE_OPTIMIZATIONS
+    BmpHelper::Save(bitmap_copy, "./blurred/neon.bmp");
 #endif
 #endif
 
@@ -236,7 +243,7 @@ int main()
 #endif
 
 
-#ifdef TEST_OPENCL
+#if defined(OPENCL)&&defined(TEST_OPENCL)
     bitmap_copy = original_bitmap;
 
     helper.Initialize();
