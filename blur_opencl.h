@@ -8,6 +8,7 @@
 #include <vector>
 #include <string>
 
+#include "macros.h"
 #include "bitmap.h"
 #include "code_timer.h"
 #include "utilities.h"

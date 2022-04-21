@@ -1,8 +1,5 @@
 #include "blur_opencl.h"
 
-//#define USE_TIMER
-#define RETURN_ND_RANGE_TIME
-
 void BlurOpenCL::BlurOpenCLZeroCopy(
 	const Bitmap& bitmap,
 	Bitmap& bitmap_dest,
