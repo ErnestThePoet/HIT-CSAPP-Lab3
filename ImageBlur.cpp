@@ -313,6 +313,9 @@ int main()
 
     bitmap_copy = original_bitmap;
 
+    helper.GetSuitableGlobalLocalSize(
+        gfx803_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
+
     timer.Start("OpenCL - AMD RX550X CopyHostPtr");
     for (int i = 0; i < test_count; i++)
     {
@@ -360,8 +363,11 @@ int main()
         std::cout << std::endl;
 
 
-
+        
         bitmap_copy = original_bitmap;
+
+        helper.GetSuitableGlobalLocalSize(
+            gfx803_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
         timer.Start("OpenCL - AMD RX550X CopyHostPtr using Image");
         for (int i = 0; i < test_count; i++)
