@@ -1,10 +1,12 @@
 #pragma once
 
-#define TAISHAN // means ARM+Linux
+////////////////////////////// Options /////////////////////////////////
 
-//#define OPENCL
+#define TAISHAN // means ARM + Linux + No OpenCL + No Warmup
 
-//#define USE_WARMUP
+#define OPENCL
+
+#define USE_WARMUP
 #define TEST_NAIVE
 #define TEST_LOOP_UNROLL
 #define TEST_CACHE_OPT
@@ -20,3 +22,11 @@
 // OpenCL Blur Settings
 //#define USE_TIMER
 #define RETURN_ND_RANGE_TIME
+
+////////////////////////////////////////////////////////////////////////
+
+#ifdef TAISHAN
+#undef OPENCL
+#undef USE_WARMUP
+#undef TEST_OPENCL
+#endif
