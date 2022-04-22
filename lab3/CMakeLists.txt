@@ -1,4 +1,4 @@
-project(blur)
-aux_source_directory(./ SRCS)
-add_executable(blur ${SRCS})
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fopenmp)
+project(lab3)
+aux_source_directory(./src SRCS)
+add_executable(lab3 ${SRCS})
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fopenmp")

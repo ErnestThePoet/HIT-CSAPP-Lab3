@@ -16,7 +16,7 @@
 
 
 #define UHD620_PROGRAM_BINARY_NAME "./cl_kernels/uhd620_cl2.0_i.bin"
-#define GFX803_PROGRAM_BINARY_NAME "./cl_kernels/gfx803_cl2.0_i.bin"
+#define GFX803_PROGRAM_BINARY_NAME "./cl_kernels/gfx803_cl2.0_a.bin"
 
 
 int main()
