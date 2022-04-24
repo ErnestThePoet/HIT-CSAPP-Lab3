@@ -30,7 +30,7 @@ public:
 		const std::string& reference_name = "",
 		const TimeUnit unit = TimeUnit::MILLISECOND,
 		const std::streamsize fixedPrecision = 2,
-		const std::streamsize width = 35);
+		const std::streamsize width = 50);
 	double Stop(const TimeUnit unit = TimeUnit::MILLISECOND);
 
 	void PrintElapse(
@@ -40,7 +40,7 @@ public:
 		const std::string& reference_name = "",
 		const TimeUnit unit = TimeUnit::MILLISECOND,
 		const std::streamsize fixedPrecision = 2,
-		const std::streamsize width = 35) const;
+		const std::streamsize width = 50) const;
 
 private:
 	std::string name_;

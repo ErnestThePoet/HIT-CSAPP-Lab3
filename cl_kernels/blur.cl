@@ -40,7 +40,7 @@ kernel void BlurNaive(
 }
 
 constant sampler_t image_sampler=
-    CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_CLAMP_TO_EDGE|CLK_FILTER_NEAREST;
+    CLK_NORMALIZED_COORDS_FALSE|CLK_ADDRESS_NONE|CLK_FILTER_NEAREST;
 
 // here we guarantee that each byte in each row is pixel data, not bmp padding
 // known issues: edge pixel may have wrong colors because their B channels aren't handeled.

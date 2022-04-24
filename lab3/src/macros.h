@@ -6,7 +6,7 @@
 
 #define OPENCL
 
-#define USE_WARMUP
+//#define USE_WARMUP
 #define TEST_NAIVE
 #define TEST_LOOP_UNROLL
 #define TEST_CACHE_OPT

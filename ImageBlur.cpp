@@ -27,7 +27,7 @@ int main()
     std::string bmp_file_name;
     std::cin >> bmp_file_name;
 
-    std::cout << "Enter the benchmark iteration count: ";
+    std::cout << "Enter benchmark iteration count: ";
     int test_count = 1;
     std::cin >> test_count;
 
@@ -291,8 +291,9 @@ int main()
         uhd620_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
     double nd_range_time = 0.0;
+    double total_nd_range_time = 0.0;
 
-    timer.Start("OpenCL - Intel UHD620 Zero-Copy Naive");
+    timer.Start("OpenCL - Intel UHD620 Zero-Copy");
     for (int i = 0; i < test_count; i++)
     {
         BlurOpenCL::BlurOpenCLZeroCopy(
@@ -304,19 +305,22 @@ int main()
             global_work_sizes, 
             local_work_sizes,
             nd_range_time);
+
+        total_nd_range_time += nd_range_time;
     }
     timer.StopAndPrint(naive_time);
-    timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+    timer.PrintElapse(total_nd_range_time, "clEnqueueNDRangeKernel", naive_time);
     std::cout << std::endl;
 
 
 
     bitmap_copy = original_bitmap;
+    total_nd_range_time = 0.0;
 
     helper.GetSuitableGlobalLocalSize(
         gfx803_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
-    timer.Start("OpenCL - AMD RX550X CopyHostPtr");
+    //timer.Start("OpenCL - AMD RX550X CopyHostPtr");
     for (int i = 0; i < test_count; i++)
     {
         BlurOpenCL::BlurOpenCLCopyHostPtr(
@@ -328,9 +332,11 @@ int main()
             global_work_sizes,
             local_work_sizes,
             nd_range_time);
+
+        total_nd_range_time += nd_range_time;
     }
-    timer.StopAndPrint(naive_time);
-    timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+    //timer.StopAndPrint(naive_time);
+    timer.PrintElapse(total_nd_range_time, "OpenCL - AMD RX550X CopyHostPtr", naive_time);
     std::cout << std::endl;
 
 
@@ -338,6 +344,7 @@ int main()
     if (bitmap_copy.width_px() % 4 == 0)
     {
         bitmap_copy = original_bitmap;
+        total_nd_range_time = 0.0;
 
         work_item_sizes[0]=bitmap_copy.width_px() * 3 / 4;
         work_item_sizes[1] = bitmap_copy.height_px();
@@ -357,20 +364,23 @@ int main()
                 global_work_sizes,
                 local_work_sizes,
                 nd_range_time);
+
+            total_nd_range_time += nd_range_time;
         }
         timer.StopAndPrint(naive_time);
-        timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+        timer.PrintElapse(total_nd_range_time, "clEnqueueNDRangeKernel", naive_time);
         std::cout << std::endl;
 
 
         
         bitmap_copy = original_bitmap;
+        total_nd_range_time = 0.0;
 
         helper.GetSuitableGlobalLocalSize(
             gfx803_device_id, 2, work_item_sizes, global_work_sizes, local_work_sizes);
 
 
-        timer.Start("OpenCL - AMD RX550X CopyHostPtr using Image");
+        //timer.Start("OpenCL - AMD RX550X CopyHostPtr using Image");
         for (int i = 0; i < test_count; i++)
         {
             BlurOpenCL::BlurOpenCL11ImageCopyHostPtr(
@@ -382,9 +392,11 @@ int main()
                 global_work_sizes,
                 local_work_sizes,
                 nd_range_time);
+
+            total_nd_range_time += nd_range_time;
         }
-        timer.StopAndPrint(naive_time);
-        timer.PrintElapse(nd_range_time, "clEnqueueNDRangeKernel", naive_time);
+        //timer.StopAndPrint(naive_time);
+        timer.PrintElapse(total_nd_range_time, "OpenCL - AMD RX550X CopyHostPtr using Image", naive_time);
         std::cout << std::endl;
     }
     else

@@ -87,6 +87,7 @@ void CodeTimer::PrintElapse(
 
 	if (name.length() > 0)
 	{
+		// setw is one-time
 		std::cout << std::left << std::setw(width) << ('[' + name + "] ") << std::right;
 	}
 
@@ -108,6 +109,15 @@ void CodeTimer::PrintElapse(
 	if (reference >= 0)
 	{
 		bool is_faster = elapse <= reference;
+
+		if (is_faster)
+		{
+			SET_PRINT_COLOR_GREEN;
+		}
+		else
+		{
+			SET_PRINT_COLOR_RED;
+		}
 
 		std::cout << " (";
 
@@ -135,4 +145,6 @@ void CodeTimer::PrintElapse(
 	std::cout << std::endl;
 	std::cout.unsetf(std::ios_base::fixed);
 	std::cout.precision(6);
+
+	SET_PRINT_COLOR_DEFAULT;
 }
