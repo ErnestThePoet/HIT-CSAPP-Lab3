@@ -1,11 +1,11 @@
 #pragma once
-#include <cstdio>
 #include "macros.h"
 
 #define BRACKETED_LINE(S)           '['<<S<<"]\n"
 
 #ifdef TAISHAN
 
+#include <cstdio>
 #define SET_PRINT_COLOR_RED      printf("\033[31m")
 #define SET_PRINT_COLOR_GREEN    printf("\033[32m")
 #define SET_PRINT_COLOR_DEFAULT  printf("\033[m")
