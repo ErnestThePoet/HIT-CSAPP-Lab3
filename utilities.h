@@ -5,10 +5,10 @@
 
 #ifdef TAISHAN
 
-#include <cstdio>
-#define SET_PRINT_COLOR_RED      printf("\033[31m")
-#define SET_PRINT_COLOR_GREEN    printf("\033[32m")
-#define SET_PRINT_COLOR_DEFAULT  printf("\033[m")
+#include <iostream>
+#define SET_PRINT_COLOR_RED      std::cout<<"\033[31m"
+#define SET_PRINT_COLOR_GREEN    std::cout<<"\033[32m"
+#define SET_PRINT_COLOR_DEFAULT  std::cout<<"\033[m"
 
 #else
 
