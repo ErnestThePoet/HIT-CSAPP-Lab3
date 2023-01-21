@@ -2,7 +2,7 @@
 
 ////////////////////////////// Options /////////////////////////////////
 
-#define TAISHAN // means ARM + Linux + No OpenCL + No Warmup
+//#define TAISHAN // means ARM + Linux + No OpenCL + No Warmup
 
 #define OPENCL
 

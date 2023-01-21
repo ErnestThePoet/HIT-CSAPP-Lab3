@@ -169,7 +169,6 @@
     <ClInclude Include="utilities.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="deprecated.txt" />
     <None Include="loop_unroll_begin.inc" />
     <None Include="loop_unroll_end.inc" />
   </ItemGroup>

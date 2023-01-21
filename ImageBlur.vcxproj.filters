@@ -27,10 +27,10 @@
     <ClCompile Include="blur_impls.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="blur_opencl.cpp">
+    <ClCompile Include="bitmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="bitmap.cpp">
+    <ClCompile Include="blur_opencl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="cl_device_helper.cpp">
@@ -50,23 +50,20 @@
     <ClInclude Include="blur_impls.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="blur_opencl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="bitmap.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cl_device_helper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="macros.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="blur_opencl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="cl_device_helper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="deprecated.txt">
-      <Filter>Source Files</Filter>
-    </None>
     <None Include="loop_unroll_begin.inc">
       <Filter>Source Files</Filter>
     </None>
